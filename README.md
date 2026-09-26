@@ -1,93 +1,35 @@
-# Interactive 3D Brain Atlas — sliceable, colour-coded, labelled
+# Interactive 3D Brain Atlas
 
-**Live site:** https://USERNAME.github.io/REPO/ (replace once GitHub Pages is enabled)
+**Live site:** https://nncceducation-cpu.github.io/brain-atlas-3d/
 
-`index.html` is a single self-contained file (~700 KB, three.js inlined). It runs from GitHub Pages,
-from any static host, or straight off disk by double-clicking it — no server, no build step, no install.
+This browser-based teaching atlas now uses real, individually named anatomical surface meshes rather than a procedurally generated approximation. It includes detailed cortex, deep grey nuclei, diencephalon, brainstem, cerebellum, ventricles, white-matter pathways, cranial nerves, cerebral and cerebellar arteries, dural venous sinuses, and dural reflections.
 
-## What is in the model
+## Features
 
-43 labelled parts, each with its function, its connections and its landmarks:
+- Hundreds of selectable left, right, and midline structures with TA2-style anatomical paths
+- Hover identification without a persistent label cloud
+- Live search with side filtering
+- Layer groups and per-structure visibility
+- Left, right, and bilateral hemisphere views
+- Cortex opacity control for deep-anatomy exploration
+- Sagittal, axial, and coronal clipping planes with side flipping
+- Focus, isolate, presets, guided systems, and lessons
+- Shareable views and high-resolution poster export
 
-| Group | Contents |
-|---|---|
-| Cerebral cortex | frontal, primary motor (M1), primary somatosensory (S1), parietal, temporal, primary auditory (A1), occipital, primary visual (V1) |
-| Limbic | cingulate cortex, insula, hippocampus, amygdala, fornix |
-| Basal ganglia | caudate, putamen, globus pallidus, nucleus accumbens, substantia nigra |
-| Diencephalon | thalamus, hypothalamus |
-| Brainstem & cerebellum | midbrain, pons, medulla, cerebellum |
-| Ventricles & glands | lateral, third and fourth ventricles, pituitary, pineal |
-| White matter | corpus callosum, anterior commissure, internal capsule |
-| Cranial pathways | optic nerve/chiasm/tract, olfactory bulb & tract |
-| Tracts | corticospinal, superior longitudinal/arcuate, uncinate, cingulum, inferior fronto-occipital, optic radiation, thalamocortical radiations, callosal radiations, middle cerebellar peduncle |
+The clipping planes intentionally leave cut faces open. The model contains anatomical surface meshes, not voxel tissue or histology; inventing filled cut textures would imply detail that is not present in the source data.
 
-Paired structures are built for both hemispheres; midline structures are single.
+## Accuracy and intended use
 
-## Controls
+The gross-anatomy surfaces are derived from Z-Anatomy / BodyParts3D. Registered deep structures and tracts draw on open MNI-space imaging atlases, including CIT168, the Najdenovska thalamic atlas, the Neudorfer hypothalamic atlas, and HCP1065 tract templates. Registered structures are approximate at roughly 7 mm.
 
-**Navigate** — drag to orbit, scroll to zoom, right-drag to pan. Preset views along the
-top (Left, Right, Front, Back, Top, Bottom, Mid-sagittal, 3/4).
+This is an educational atlas, not a patient-specific brain. Do not use it for diagnosis, lesion localization, stereotactic targeting, or operative planning.
 
-**Slice** — the panel at the bottom drives three independent clipping planes:
-sagittal (x), coronal (z) and axial (y). Tick a plane, then drag its slider through the
-brain; `⇄` flips which half is kept. Any combination of the three can be active at once.
-The planes use clean surface clipping and deliberately avoid an invented solid fill:
-this model is a set of anatomical surfaces, not volumetric MRI, so a synthetic filled
-cross-section would imply tissue detail that the source geometry does not contain.
-**Scrub slice** animates the active plane back and forth through the whole brain.
+## Running locally
 
-**Explore** — hover over any structure to identify it, then click it (or use the left list) to
-load its function, connections and landmarks into the right-hand card. Connection chips
-are clickable, so you can walk the network: hippocampus → fornix → hypothalamus.
-*Show connections* hides everything except the selected structure, everything it talks
-to, and the tracts that link them. *Isolate* leaves only the selection. *Focus* flies the
-camera to it.
+Serve the repository over HTTP and open `index.html`. The model is loaded at runtime from `models/brain.glb`; opening the file directly from disk will not work reliably.
 
-**Display** — structure names appear only on hover so the anatomy stays unobscured.
-`Tracts` toggles the white-matter bundles. `Ghost cortex` makes the cortical surface translucent so the deep
-grey matter shows through without slicing. `L`/`R`/`Both` selects hemispheres, and the
-left panel has per-structure visibility (the ◉ icon) plus *Cortex only* / *Deep only*.
+## Licensing and attribution
 
-**Keyboard** — `T` tracts, `G` ghost cortex, `X`/`Y`/`Z` toggle a slice
-plane, `←`/`→` step the active plane by 2 mm, `Space` scrub, `Esc` clear isolation.
+Viewer code is Apache License 2.0. The 3D anatomy assets and derived metadata are CC BY-SA 4.0 and remain under that license. See [LICENSE](LICENSE) and [ATTRIBUTION.md](ATTRIBUTION.md).
 
-## How the geometry is made, and what that means
-
-The anatomy is generated procedurally in the browser rather than loaded from a scan:
-the cerebral surface is an analytic shell whose radius is shaped by the lateral fissure
-and the tapering of the frontal, temporal and occipital poles. Stable anatomical
-landmarks—the central, precentral, postcentral, lateral, frontal, intraparietal,
-parieto-occipital and calcarine sulci—are layered with band-limited secondary folds;
-parcels are cut from that surface by anatomical rules (the central sulcus line tilts
-forward as it runs laterally, the temporal lobe starts below the Sylvian line, V1 hugs
-the calcarine region). The cerebellum has transverse folia, a horizontal fissure,
-vermis and paravermian grooves. Nuclei are
-deformed ellipsoids and tapered tubes placed at coordinates in millimetres from the
-mid-commissural point (x = right, y = superior, z = anterior); the corpus callosum is a
-swept mid-sagittal profile; tracts are tubes along their anatomical courses.
-
-Landmark dimensions were fitted against reference values — 163 mm anterior–posterior
-(z = −86 to +77), 133 mm wide, vertex 54 mm above the origin, temporal pole reaching
-z = +36 mm at y = −30 — so
-proportions and spatial relationships are right, and the cut faces are watertight.
-
-**It is a teaching model, not a subject's brain.** Gyral and sulcal patterns are
-plausible rather than individual, parcel boundaries are idealised rules rather than
-cytoarchitectonic borders, and nothing here is derived from or registered to MRI. Use it
-to teach and to reason about layout and connectivity — not to localise a lesion or plan
-anything clinical.
-
-## Publishing
-
-GitHub Pages: push this folder to a repository, then **Settings → Pages → Source: Deploy from a
-branch → `main` / `root`**. The atlas is served at `https://<user>.github.io/<repo>/` within a
-minute or two. `.nojekyll` keeps Jekyll from touching the file. Any other static host (Netlify,
-Cloudflare Pages, S3) works the same way — it is one file with no dependencies.
-
-## Rebuilding
-
-`src/` holds the sources (`app_geom.js` geometry engine, `app_data.js` atlas content,
-`app_main.js` renderer/UI, `shell.html`, `style.css`); `python build.py` inlines
-everything, including three.js from `vendor/`, into the deployable `index.html`.
-To add a structure, append one entry to `BD.STRUCTURES` with its colour, function text,
-`conn` list, label anchor and a geometry recipe, then rebuild.
+The atlas is adapted from [itayinbarr/brainproject](https://github.com/itayinbarr/brainproject), with anatomical clipping added for this deployment.
