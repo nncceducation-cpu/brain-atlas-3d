@@ -117,7 +117,12 @@
       // anatomical upright: Z-Anatomy exports anterior toward +Z; face the camera
       model.rotation.y = Math.PI;
       model.updateMatrixWorld(true);
-      const specimenBounds = new T.Box3().setFromObject(model);
+      // Drive the controls from the cerebral envelope, not the full scene. The
+      // latter includes the inferior brainstem and long vessels, which made much
+      // of the axial slider show empty space before reaching the cerebrum.
+      const cerebralBounds = new T.Box3().makeEmpty();
+      (cats.cortex && cats.cortex.meshes || []).forEach(m => cerebralBounds.expandByObject(m));
+      const specimenBounds = cerebralBounds.isEmpty() ? new T.Box3().setFromObject(model) : cerebralBounds;
       clipBounds[0].set(specimenBounds.min.x, specimenBounds.max.x);
       clipBounds[1].set(specimenBounds.min.y, specimenBounds.max.y);
       clipBounds[2].set(specimenBounds.min.z, specimenBounds.max.z);
@@ -881,16 +886,18 @@
     }
 
     /* ---------------- anatomical MRI-style slice slabs ----------------
-       Values travel through the measured specimen bounds. A matched plane pair
-       stays parallel to the named anatomical axis and retains a thin slab at the
-       selected position. Cut faces stay open because this is surface anatomy,
+       Values travel through the measured cerebral bounds. A matched plane pair
+       stays parallel to the named anatomical axis and retains a broad section at
+       the selected position. The extra depth preserves anatomical context because
+       this atlas is made of surfaces rather than a filled MRI voxel volume.
+       Cut faces stay open because this is surface anatomy,
        not voxel tissue; synthetic caps would imply false histology. */
     function setSlice(axis, enabled, value) {
       const a = Math.max(0, Math.min(2, axis | 0));
       const lo = clipBounds[a].x, hi = clipBounds[a].y;
       const t = (Math.max(-100, Math.min(100, Number(value) || 0)) + 100) / 200;
       const center = T.MathUtils.lerp(lo, hi, t);
-      const half = Math.max((hi - lo) * 0.045, 0.045);
+      const half = Math.max((hi - lo) * 0.16, 0.12);
       const lowPlane = clipPlanes[a * 2], highPlane = clipPlanes[a * 2 + 1];
       lowPlane.normal.set(a === 0 ? 1 : 0, a === 1 ? 1 : 0, a === 2 ? 1 : 0);
       highPlane.normal.set(a === 0 ? -1 : 0, a === 1 ? -1 : 0, a === 2 ? -1 : 0);

@@ -19,7 +19,7 @@ const PRESETS = [
     } },
   { id: 'parasag', label: 'Para-sagittal', color: 'var(--c-ventricles)', on: ['cortex','white_matter','deep_grey','diencephalon','ventricles','brainstem','cerebellum'], cortex: 1, focus: null, view: 'sagittal', slice: { axis: 0, value: 24 } },
   { id: 'coronal', label: 'Neonatal coronal', color: 'var(--c-deep_grey)', on: ['cortex','white_matter','deep_grey','diencephalon','ventricles','brainstem','cerebellum'], cortex: 1, focus: null, view: 'coronal', slice: { axis: 2, value: 0 } },
-  { id: 'axial', label: 'Neonatal axial', color: 'var(--c-diencephalon)', on: ['cortex','white_matter','deep_grey','diencephalon','ventricles','brainstem','cerebellum'], cortex: 1, focus: null, view: 'axial', slice: { axis: 1, value: 65 } },
+  { id: 'axial', label: 'Neonatal axial', color: 'var(--c-diencephalon)', on: ['cortex','white_matter','deep_grey','diencephalon','ventricles','brainstem','cerebellum'], cortex: 1, focus: null, view: 'axial', slice: { axis: 1, value: 0 } },
   { id: 'vasc',   label: 'Vasculature',      color: 'var(--c-arteries)',       on: ['arteries','veins_sinuses'],        cortex: 0.12, focus: 'arteries' },
   { id: 'willis', label: 'Circle of Willis', color: 'var(--c-arteries)',       on: ['arteries'],                        cortex: 0.08, focus: 'arteries',
     subset: { arteries: ['Anterior cerebral artery', 'Anterior communicating artery', 'Internal carotid artery', 'Posterior communicating artery', 'Posterior cerebral artery', 'Basilar artery'] } },
@@ -840,7 +840,7 @@ function SlicePanel({ value, onChange, onView }) {
       {value.map((v, i) => (
         <div key={names[i]} style={{ display: 'grid', gridTemplateColumns: '82px 1fr 42px', gap: 8, alignItems: 'center', margin: '7px 0' }}>
           <label style={{ fontSize: 11.5, display: 'flex', gap: 6, alignItems: 'center' }}>
-            <input type="checkbox" checked={v.on} onChange={e => update(i, { on: e.target.checked, value: e.target.checked && i === 1 && v.value === 0 ? 65 : v.value })} /> {names[i]}
+            <input type="checkbox" checked={v.on} onChange={e => update(i, { on: e.target.checked })} /> {names[i]}
           </label>
           <div>
             <input aria-label={`${names[i]} slice position`} type="range" min="-100" max="100" step="1" value={v.value} disabled={!v.on}
