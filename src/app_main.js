@@ -225,7 +225,7 @@
     var W = window.innerWidth, H = window.innerHeight, placed = [], i, j;
     for (i = 0; i < labels.length; i++) {
       var L = labels[i], def = L.def, show = state.labels > 0 && effVisible(def) &&
-        (state.labels === 2 || def.key <= 2) && (def.mirror ? hemiOK('R') || hemiOK('L') : true);
+        (state.labels === 2 || def.key === 1) && (def.mirror ? hemiOK('R') || hemiOK('L') : true);
       if (show) {
         var p = anchorOf(def).clone();
         if (!insideSlices(p)) show = false;

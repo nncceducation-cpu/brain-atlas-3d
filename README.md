@@ -55,10 +55,13 @@ plane, `←`/`→` step the active plane by 2 mm, `Space` scrub, `Esc` clear iso
 
 The anatomy is generated procedurally in the browser rather than loaded from a scan:
 the cerebral surface is an analytic shell whose radius is shaped by the lateral fissure
-and the tapering of the frontal, temporal and occipital poles, then displaced by
-band-limited noise to give gyri and sulci; parcels are cut from that surface by
-anatomical rules (the central sulcus line tilts forward as it runs laterally, the
-temporal lobe starts below the Sylvian line, V1 hugs the calcarine region). Nuclei are
+and the tapering of the frontal, temporal and occipital poles. Stable anatomical
+landmarks—the central, precentral, postcentral, lateral, frontal, intraparietal,
+parieto-occipital and calcarine sulci—are layered with band-limited secondary folds;
+parcels are cut from that surface by anatomical rules (the central sulcus line tilts
+forward as it runs laterally, the temporal lobe starts below the Sylvian line, V1 hugs
+the calcarine region). The cerebellum has transverse folia, a horizontal fissure,
+vermis and paravermian grooves. Nuclei are
 deformed ellipsoids and tapered tubes placed at coordinates in millimetres from the
 mid-commissural point (x = right, y = superior, z = anterior); the corpus callosum is a
 swept mid-sagittal profile; tracts are tubes along their anatomical courses.
@@ -85,6 +88,6 @@ Cloudflare Pages, S3) works the same way — it is one file with no dependencies
 
 `src/` holds the sources (`app_geom.js` geometry engine, `app_data.js` atlas content,
 `app_main.js` renderer/UI, `shell.html`, `style.css`); `python build.py` inlines
-everything, including three.js from `vendor/`, into `brain_atlas_3d.html`.
+everything, including three.js from `vendor/`, into the deployable `index.html`.
 To add a structure, append one entry to `BD.STRUCTURES` with its colour, function text,
 `conn` list, label anchor and a geometry recipe, then rebuild.

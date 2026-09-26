@@ -195,9 +195,12 @@ var BD = (function () {
         var notch = Math.exp(-Math.pow(X/16,2)) * Math.max(0,uz);
         Z *= 1 - 0.42*notch;                                     /* space for brainstem */
         var L = Math.sqrt(X*X+Y*Y+Z*Z) || 1;
-        var d = 1.25*Math.sin(Y*1.55 + Z*0.16) + 0.55*Math.sin(Y*3.2 + 1.2);
-        d += 1.5*Math.exp(-Math.pow(X/7,2));                     /* vermis ridge */
-        d -= 0.9*Math.exp(-Math.pow((Math.abs(X)-13)/6,2));      /* paravermian groove */
+        var folialPhase = Y*1.72 + Z*0.20 + 0.20*Math.sin(X*0.18);
+        var d = 1.05*Math.sin(folialPhase) + 0.42*Math.sin(folialPhase*2.05 + 0.7);
+        d -= 1.45*Math.exp(-Math.pow((Y + 1.5)/1.6,2));          /* horizontal fissure */
+        d += 2.25*Math.exp(-Math.pow(X/7.5,2));                  /* vermis ridge */
+        d -= 1.10*Math.exp(-Math.pow((Math.abs(X)-13)/5.5,2));   /* paravermian groove */
+        d *= 0.75 + 0.25*Math.min(1,Math.abs(Z)/18);
         return [X + X/L*d, Y + Y/L*d, Z + Z/L*d];
       }});
     } },

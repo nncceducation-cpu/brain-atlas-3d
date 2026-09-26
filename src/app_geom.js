@@ -68,10 +68,10 @@ var BG = (function () {
     var dy = Math.cos(theta), sn = Math.sin(theta);
     var dz = sn * Math.cos(phi), dx = sn * Math.sin(phi);
     var ax = A, by = B, cz = C, t = Math.max(0, -dy);
-    ax *= 1 - 0.38 * Math.pow(Math.abs(dz), 1.45);       /* taper towards the poles */
-    ax *= 1 - 0.16 * Math.max(0, dy) * Math.max(0, dy);  /* narrow at the vertex    */
+    ax *= 1 - 0.34 * Math.pow(Math.abs(dz), 1.55);       /* taper towards the poles */
+    ax *= 1 - 0.13 * Math.max(0, dy) * Math.max(0, dy);  /* narrow at the vertex    */
     if (dy < 0) by *= 0.80;                              /* flat skull base         */
-    if (dz > 0) cz *= 0.93 * (1 - 0.45 * Math.pow(t, 0.55));  /* short temporal pole */
+    if (dz > 0) cz *= 0.96 * (1 - 0.43 * Math.pow(t, 0.55));  /* short temporal pole */
     else cz *= 1 - 0.32 * Math.pow(t, 0.7);              /* inferior occipital      */
     var x = ax * dx, y = by * dy, z = cz * dz;
     y += 3.2 * Math.max(0, dz) * t;                      /* orbital surface lift    */
@@ -82,10 +82,32 @@ var BG = (function () {
     var k = 1 - 0.13 * groove;                           /* lateral fissure         */
     return [x * k, y * k, z * k];
   }
+  /* Anatomical sulci are modelled separately from the small stochastic folds.
+     This gives the surface stable landmarks instead of texture-like noise. */
+  function gauss(v, width) { var q = v / width; return Math.exp(-q * q); }
   function gyrify(p) {
     var x = p[0], y = p[1], z = p[2];
-    var n = fbm(x * 0.072, y * 0.072, z * 0.072) * 2.9 +
-            fbm(x * 0.155 + 3.1, y * 0.155 + 1.7, z * 0.155 + 8.3) * 1.15;
+    var nx = x / A, ny = y / B, nz = z / C, lat = Math.pow(Math.abs(nx), 0.72);
+    var folds = Math.sin(15.5 * ny + 2.8 * nz + 1.2 * Math.sin(5 * nz)) * 0.95;
+    folds += Math.sin(12.0 * nz - 3.4 * ny + 2.1 * Math.sin(4 * ny)) * 0.72;
+    folds += fbm(x * 0.060, y * 0.060, z * 0.060) * 1.55;
+    folds += fbm(x * 0.125 + 3.1, y * 0.125 + 1.7, z * 0.125 + 8.3) * 0.62;
+    var centralD = nz - central(Math.abs(nx));
+    var sylvianD = ny - sylvian(nz);
+    var centralSulcus = 4.8 * gauss(centralD, 0.026) * lat * gauss(ny - 0.35, 0.58);
+    var precentral = 1.65 * gauss(centralD - 0.145, 0.034) * lat * gauss(ny - 0.32, 0.62);
+    var postcentral = 1.55 * gauss(centralD + 0.145, 0.034) * lat * gauss(ny - 0.31, 0.62);
+    var lateralSulcus = 5.4 * gauss(sylvianD, 0.035) * lat * gauss(nz + 0.02, 0.55);
+    var frontalMask = gauss(nz - 0.34, 0.48) * lat;
+    var frontalSulci = (1.5 * gauss(ny - (0.28 + 0.10 * nz), 0.032) +
+                        1.25 * gauss(ny - (0.03 + 0.07 * nz), 0.030)) * frontalMask;
+    var intraparietal = 1.8 * gauss(ny - (0.36 - 0.18 * nz), 0.035) *
+                        gauss(nz + 0.36, 0.34) * lat;
+    var medial = Math.pow(Math.max(0, 1 - Math.abs(nx) / 0.34), 2);
+    var parOcc = 3.0 * gauss(nz + 0.56 + 0.34 * ny, 0.035) * medial * gauss(ny - 0.15, 0.62);
+    var calcarine = 2.7 * gauss(ny - (-0.02 + 0.10 * nz), 0.030) * medial * gauss(nz + 0.67, 0.30);
+    var n = folds - centralSulcus - precentral - postcentral - lateralSulcus -
+            frontalSulci - intraparietal - parOcc - calcarine;
     var L = Math.sqrt(x * x + y * y + z * z) || 1;
     return [x + x / L * n, y + y / L * n, z + z / L * n];
   }

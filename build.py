@@ -20,6 +20,6 @@ out = (shell.replace('/*__CSS__*/', css)
 for k in ('__CSS__', '__THREE__', '__ORBIT__', '__APP__'):
     assert '/*%s*/' % k not in out, 'placeholder %s not filled' % k
 
-io.open('brain_atlas_3d.html', 'w', encoding='utf8').write(out)
-print('brain_atlas_3d.html', round(len(out) / 1024, 1), 'KB')
+io.open('index.html', 'w', encoding='utf8', newline='\r\n').write(out)
+print('index.html', round(len(out) / 1024, 1), 'KB')
 print('app js lines:', app.count('\n'))
