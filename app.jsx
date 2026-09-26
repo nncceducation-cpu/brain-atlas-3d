@@ -9,6 +9,14 @@ const SHORT = {
 
 const PRESETS = [
   { id: 'whole',  label: 'Newborn overview', color: 'var(--c-cortex)',         on: ['cortex','deep_grey','diencephalon','ventricles','cerebellum','brainstem'], cortex: 1, focus: null },
+  { id: 'midsag', label: 'Neonatal midsagittal', color: 'var(--c-white_matter)', on: ['cortex','white_matter','diencephalon','ventricles','brainstem','cerebellum','arteries','veins_sinuses'], cortex: 1, focus: null,
+    subset: {
+      white_matter: ['Corpus callosum','Fornix','Anterior commissure'],
+      ventricles: ['Septum pellucidum','Third ventricle','Fourth ventricle'],
+      brainstem: ['Aqueduct of midbrain','Midbrain','Pons','Medulla oblongata'],
+      arteries: ['Anterior communicating artery','Anterior cerebral artery','Pericallosal artery','Basilar artery','Posterior cerebral artery'],
+      veins_sinuses: ['Superior sagittal sinus','Inferior sagittal sinus','Straight sinus'],
+    } },
   { id: 'vasc',   label: 'Vasculature',      color: 'var(--c-arteries)',       on: ['arteries','veins_sinuses'],        cortex: 0.12, focus: 'arteries' },
   { id: 'willis', label: 'Circle of Willis', color: 'var(--c-arteries)',       on: ['arteries'],                        cortex: 0.08, focus: 'arteries',
     subset: { arteries: ['Anterior cerebral artery', 'Anterior communicating artery', 'Internal carotid artery', 'Posterior communicating artery', 'Posterior cerebral artery', 'Basilar artery'] } },
@@ -88,6 +96,20 @@ function App() {
     cortex:'#E9B8AE', white_matter:'#E8CEC4', deep_grey:'#B883A1', diencephalon:'#8D91CF',
     brainstem:'#D7A06D', cerebellum:'#D98F7B', ventricles:'#65C2C5', arteries:'#E35D70',
     veins_sinuses:'#667FC4', cranial_nerves:'#D6C765', meninges_dura:'#B96BB1', tracts:'#62B9A8'
+  });
+  Object.assign(window.BRAIN.descriptions, {
+    'Corpus callosum': 'The major commissural bundle connecting the cerebral hemispheres. On a true midsagittal neonatal image, identify the genu anteriorly, body superiorly, and splenium posteriorly. It is an important landmark when assessing brain development and midline formation.',
+    'Fornix': 'A paired arching white-matter pathway beneath the corpus callosum. In the neonatal midsagittal plane it carries hippocampal output toward the mammillary bodies.',
+    'Septum pellucidum': 'A thin midline membrane between the frontal horns of the lateral ventricles. A cavum septi pellucidi is commonly visible in newborn imaging and is a normal developmental finding when isolated.',
+    'Third ventricle': 'The narrow midline CSF cavity between the thalami. In a neonatal midsagittal view it continues posteriorly into the cerebral aqueduct.',
+    'Aqueduct of midbrain': 'The narrow CSF channel through the midbrain connecting the third and fourth ventricles. Its position is a useful midsagittal landmark.',
+    'Fourth ventricle': 'The CSF cavity between the pons and medulla anteriorly and the cerebellar vermis posteriorly.',
+    'Pons': 'The rounded middle segment of the brainstem, anterior to the fourth ventricle. In newborn imaging it is assessed with the midbrain and medulla for symmetry, maturation, and injury.',
+    'Medulla oblongata': 'The caudal brainstem segment below the pons. It contains pathways and nuclei essential for breathing and cardiovascular control in the newborn.',
+    'Midbrain': 'The rostral brainstem segment surrounding the cerebral aqueduct, between the diencephalon and pons. Its contour helps orient the neonatal midsagittal plane.',
+    'Pericallosal artery': 'The distal anterior cerebral artery coursing around the corpus callosum, a useful vascular landmark along the medial cerebral surface.',
+    'Superior sagittal sinus': 'The major midline dural venous sinus along the superior margin of the falx cerebri, draining posteriorly toward the confluence of sinuses.',
+    'Straight sinus': 'A midline venous channel at the junction of the falx and tentorium, receiving deep cerebral venous drainage.'
   });
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
   const mobile = useIsMobile();
@@ -341,6 +363,14 @@ function App() {
     setIsolatedIds(null); setSearch(''); setSelectedId(null); setFocusedId(null);  // close any open selection card
     const o = {}; CAT_ORDER.forEach(c => o[c] = p.on.includes(c) || (c === 'cortex' && p.cortex > 0));
     setLayerOn(o); setCortexOpacity(p.cortex);
+    if (p.id === 'midsag') {
+      setHemisphere('both');
+      setSlice([{ on: true, value: 0, flip: false }, { on: false, value: 0, flip: false }, { on: false, value: 0, flip: false }]);
+      setTweak('autorotate', false);
+      setTimeout(() => {
+        if (sceneRef.current) { sceneRef.current.setAutoRotate(false); sceneRef.current.setView('sagittal'); }
+      }, 60);
+    }
     if (doFocus && p.focus) setTimeout(() => sceneRef.current && sceneRef.current.focusCategory(p.focus), 60);
     else if (doFocus) sceneRef.current && sceneRef.current.reset();
   };

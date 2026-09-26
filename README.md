@@ -2,6 +2,8 @@
 
 **Live site:** https://nncceducation-cpu.github.io/brain-atlas-3d/
 
+Neonatal teaching content and the curated midsagittal landmark view are informed by Meijler and Mohammad's open-access *Neonatal Brain Injury* (2024), especially Chapter 2, Normal Anatomy (CC BY 4.0), and Rutherford's *MRI of the Neonatal Brain*. The latter is used as a textual reference only; its copyrighted figures are not redistributed.
+
 This browser-based teaching atlas now uses real, individually named anatomical surface meshes rather than a procedurally generated approximation. It includes detailed cortex, deep grey nuclei, diencephalon, brainstem, cerebellum, ventricles, white-matter pathways, cranial nerves, cerebral and cerebellar arteries, dural venous sinuses, and dural reflections.
 
 The NNCC interface uses an original dark clinical-workspace design with a right-side anatomy navigator, left-side structure cards, and a separate clipping console. The underlying anatomy dataset remains attributed under its open licence.

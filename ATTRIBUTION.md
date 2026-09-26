@@ -14,6 +14,11 @@ The viewer source is used under the Apache License 2.0. The 3D anatomy assets (`
 
 This educational model is approximate and is not intended for clinical use.
 
+## Neonatal anatomy references
+
+- Meijler G, Mohammad K, editors. *Neonatal Brain Injury: An Illustrated Guide for Clinicians Counselling Parents and Caregivers*. Springer Nature; 2024. Chapter 2, Normal Anatomy. CC BY 4.0. https://doi.org/10.1007/978-3-031-55972-3
+- Rutherford MA, editor. *MRI of the Neonatal Brain*. https://www.mrineonatalbrain.com/. Used as a textual anatomy and maturation reference. Website figures are not redistributed.
+
 ## Interaction references
 
 The anatomical orientation controls were informed by the public Neurotorium 3D Brain Atlas interface. Keyboard-accessible learning-mode navigation was informed by the public NeuroGlance interface. These are UX references only; this repository does not redistribute their models, imagery, text, or source code.

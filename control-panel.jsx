@@ -259,6 +259,17 @@ function ControlPanel(props) {
               })}
             </div>
             )}
+            {props.activePreset === 'midsag' && (
+              <div style={{ marginTop: 9, padding: '10px 11px', borderRadius: 11, background: 'rgba(242,155,143,.10)', border: '1px solid rgba(217,120,112,.20)' }}>
+                <div className="eyebrow" style={{ marginBottom: 7, color: 'var(--accent-press)' }}>Neonatal midline landmarks</div>
+                <div className="preset-rail" style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 3 }}>
+                  {['Corpus callosum','Fornix','Septum pellucidum','Third ventricle','Aqueduct of midbrain','Fourth ventricle','Midbrain','Pons','Medulla oblongata'].map(label => {
+                    const node = window.BRAIN.nodes.find(n => n.label === label);
+                    return <button key={label} disabled={!node} onClick={() => node && props.onFocus(node.id)} style={{ flex: '0 0 auto', border: '1px solid var(--hair)', borderRadius: 99, padding: '5px 9px', background: 'rgba(255,255,255,.75)', color: 'var(--ink-soft)', fontSize: 10.5, fontWeight: 650 }}>{label}</button>;
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* cortex opacity */}
