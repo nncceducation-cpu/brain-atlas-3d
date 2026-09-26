@@ -146,11 +146,12 @@ function NarrationCard(props) {
 
   const cardStyle = mobile
     ? { position: 'absolute', left: 8, right: 8, bottom: 8, zIndex: 40, padding: '14px 15px 16px' }
-    : { position: 'absolute', left: '50%', bottom: 22, transform: 'translateX(-50%)', width: 'min(660px, calc(100vw - 48px))', zIndex: 40, padding: '16px 20px 18px', ...(drag.override || {}) };
+    : { position: 'absolute', right: 18, top: 86, width: 'min(390px, calc(100vw - 36px))', maxHeight: 'calc(100vh - 104px)', overflowY: 'auto', zIndex: 40, padding: '16px 18px 17px', ...(drag.override || {}) };
 
   return (
     <div ref={drag.ref} className={'glass-dark' + (drag.dragging ? '' : ' fade')} style={cardStyle}>
       {header}
+      {!isLesson && <button onClick={onClose} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, margin: '0 0 12px', border: '1px solid rgba(255,255,255,.28)', borderRadius: 10, padding: '9px 11px', background: 'rgba(255,255,255,.13)', color: '#fff', fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}><Icon name="arrowLeft" size={14} /> Back to anatomy home</button>}
       <div key={idx}>
         <h3 style={{ margin: '0 0 8px', fontSize: mobile ? 17 : 20, fontWeight: 800, letterSpacing: '-0.018em', color: 'var(--on-stage)', lineHeight: 1.16, textWrap: 'pretty' }}>{stage.title}</h3>
         <p style={{ margin: 0, fontSize: mobile ? 13 : 14, lineHeight: 1.58, color: 'var(--on-stage-soft)', textWrap: 'pretty' }}>{stage.body}</p>

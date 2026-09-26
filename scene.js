@@ -42,11 +42,11 @@
     renderer.toneMappingExposure = opts.exposure || 0.95;
 
     const scene = new T.Scene();
-    const clipPlanes = [
-      new T.Plane(new T.Vector3(-1, 0, 0), 1e5),
-      new T.Plane(new T.Vector3(0, -1, 0), 1e5),
-      new T.Plane(new T.Vector3(0, 0, -1), 1e5),
-    ];
+    // Each anatomical axis uses a pair of parallel planes. Together they retain
+    // a thin, MRI-like slab instead of progressively shaving the brain from only
+    // one side. Planes remain in specimen/world coordinates when the camera orbits.
+    const clipPlanes = Array.from({ length: 6 }, () => new T.Plane(new T.Vector3(1, 0, 0), 1e5));
+    const clipBounds = [new T.Vector2(-1.7, 1.7), new T.Vector2(-1.7, 1.7), new T.Vector2(-1.7, 1.7)];
     const camera = new T.PerspectiveCamera(38, 1, 0.01, 200);
 
     // lights - soft clinical key + cool/warm rims for the "designed" stage
@@ -116,6 +116,11 @@
       model.scale.set(1.64 / r, 1.73 / r, 1.69 / r);
       // anatomical upright: Z-Anatomy exports anterior toward +Z; face the camera
       model.rotation.y = Math.PI;
+      model.updateMatrixWorld(true);
+      const specimenBounds = new T.Box3().setFromObject(model);
+      clipBounds[0].set(specimenBounds.min.x, specimenBounds.max.x);
+      clipBounds[1].set(specimenBounds.min.y, specimenBounds.max.y);
+      clipBounds[2].set(specimenBounds.min.z, specimenBounds.max.z);
 
       loaded = true;
       // apply whatever the React app already asked for, then settle instantly
@@ -139,6 +144,9 @@
     function applyCamera() {
       const off = new T.Vector3().setFromSpherical(sph);
       camera.position.copy(target).add(off);
+      // A true superior view makes the usual Y-up vector collinear with the
+      // viewing direction. Use posterior as screen-up at the axial pole.
+      camera.up.set(0, Math.abs(Math.sin(sph.phi)) < 0.01 ? 0 : 1, Math.abs(Math.sin(sph.phi)) < 0.01 ? -1 : 0);
       camera.lookAt(target);
     }
 
@@ -181,8 +189,8 @@
     function setView(view) {
       const r = sphGoal.radius;
       if (view === 'sagittal') { sphGoal.theta = Math.PI / 2; sphGoal.phi = Math.PI / 2; }
-      else if (view === 'coronal') { sphGoal.theta = 0; sphGoal.phi = Math.PI / 2; }
-      else if (view === 'axial') { sphGoal.theta = 0; sphGoal.phi = 0.18; }
+      else if (view === 'coronal') { sphGoal.theta = Math.PI; sphGoal.phi = Math.PI / 2; }
+      else if (view === 'axial') { sphGoal.theta = 0; sphGoal.phi = 0.001; }
       else { sphGoal.theta = 0.55; sphGoal.phi = Math.PI / 2.25; }
       sphGoal.radius = r;
       tgtGoal.set(0, -0.05, 0);
@@ -872,15 +880,22 @@
       });
     }
 
-    /* ---------------- anatomical clipping planes ----------------
-       Values are normalized percentages of the centered specimen. We leave cut
-       faces open: the GLB contains anatomical surfaces, not voxel tissue, so a
-       synthetic cap would falsely imply histological information. */
-    function setSlice(axis, enabled, value, flip) {
+    /* ---------------- anatomical MRI-style slice slabs ----------------
+       Values travel through the measured specimen bounds. A matched plane pair
+       stays parallel to the named anatomical axis and retains a thin slab at the
+       selected position. Cut faces stay open because this is surface anatomy,
+       not voxel tissue; synthetic caps would imply false histology. */
+    function setSlice(axis, enabled, value) {
       const a = Math.max(0, Math.min(2, axis | 0));
-      const n = flip ? 1 : -1;
-      clipPlanes[a].normal.set(a === 0 ? n : 0, a === 1 ? n : 0, a === 2 ? n : 0);
-      clipPlanes[a].constant = enabled ? -n * ((Number(value) || 0) / 100 * 1.75) : 1e5;
+      const lo = clipBounds[a].x, hi = clipBounds[a].y;
+      const t = (Math.max(-100, Math.min(100, Number(value) || 0)) + 100) / 200;
+      const center = T.MathUtils.lerp(lo, hi, t);
+      const half = Math.max((hi - lo) * 0.045, 0.045);
+      const lowPlane = clipPlanes[a * 2], highPlane = clipPlanes[a * 2 + 1];
+      lowPlane.normal.set(a === 0 ? 1 : 0, a === 1 ? 1 : 0, a === 2 ? 1 : 0);
+      highPlane.normal.set(a === 0 ? -1 : 0, a === 1 ? -1 : 0, a === 2 ? -1 : 0);
+      lowPlane.constant = enabled ? -(center - half) : 1e5;
+      highPlane.constant = enabled ? center + half : 1e5;
     }
 
     /* ---------------- high-definition poster ---------------- */

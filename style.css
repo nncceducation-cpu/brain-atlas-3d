@@ -120,6 +120,8 @@ button { font-family: inherit; cursor: pointer; }
 
 /* ---------- cinematic narration / lesson cards (dark glass over the stage) ---------- */
 .glass-dark {
+  --on-stage: #F8FAFC;
+  --on-stage-soft: #D5DEE7;
   background: rgba(13, 17, 26, 0.66);
   -webkit-backdrop-filter: blur(22px) saturate(150%);
   backdrop-filter: blur(22px) saturate(150%);
