@@ -600,6 +600,10 @@ function App() {
       if (e.target.tagName === 'INPUT') { if (e.key === 'Escape') e.target.blur(); return; }
       if (e.key === '/') { e.preventDefault(); const i = document.querySelector('.glass input'); i && i.focus(); }
       else if (e.key === 'Escape') { if (isolatedIds) clearIsolate(); else setSelectedId(null); }
+      else if (e.key === '1') switchMode('explore');
+      else if (e.key === '2') switchMode('systems');
+      else if (e.key === '3') switchMode('learn');
+      else if (e.key.toLowerCase() === 'r') reset();
     };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
@@ -657,7 +661,8 @@ function App() {
         onSelect={selectNode} onRelated={focusNode} onFocus={toggleFocus} onIsolate={isolateNode} onClose={() => setSelectedId(null)}
         isolated={!!isolatedIds} focused={selNode && focusedId === selNode.id} onClearIsolate={clearIsolate} mobile={mobile} />
 
-      {!mobile && <SlicePanel value={slice} onChange={setSlice} />}
+      {!mobile && <SlicePanel value={slice} onChange={setSlice}
+        onView={v => sceneRef.current && sceneRef.current.setView(v)} />}
 
       {/* SYSTEMS narration (free stepping) */}
       {activeSystem && !lesson && (
@@ -707,14 +712,24 @@ function App() {
   );
 }
 
-function SlicePanel({ value, onChange }) {
+function SlicePanel({ value, onChange, onView }) {
   const names = ['Sagittal', 'Axial', 'Coronal'];
   const update = (i, patch) => onChange(value.map((v, j) => j === i ? { ...v, ...patch } : v));
   const active = value.some(v => v.on);
   return (
     <div className="glass" style={{ position: 'absolute', left: '50%', bottom: 16, transform: 'translateX(-50%)', zIndex: 18,
       width: 470, padding: '10px 13px', borderRadius: 14, color: 'var(--on-stage)' }}>
-      <div className="eyebrow-light" style={{ fontSize: 10, fontWeight: 750, letterSpacing: '.1em', marginBottom: 7 }}>ANATOMICAL CLIPPING</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 7 }}>
+        <div className="eyebrow-light" style={{ fontSize: 10, fontWeight: 750, letterSpacing: '.1em' }}>ANATOMICAL CLIPPING</div>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {['sagittal', 'coronal', 'axial', 'three-quarter'].map(v => (
+            <button key={v} onClick={() => onView(v)} title={`${v} view`}
+              style={{ padding: '4px 7px', borderRadius: 7, border: '1px solid var(--glass-edge)', background: 'rgba(255,255,255,.07)', color: 'var(--on-stage-soft)', fontSize: 9.5, cursor: 'pointer', textTransform: 'capitalize' }}>
+              {v === 'three-quarter' ? '3/4' : v.slice(0, 3)}
+            </button>
+          ))}
+        </div>
+      </div>
       {value.map((v, i) => (
         <div key={names[i]} style={{ display: 'grid', gridTemplateColumns: '82px 1fr 42px 34px', gap: 8, alignItems: 'center', margin: '5px 0' }}>
           <label style={{ fontSize: 11.5, display: 'flex', gap: 6, alignItems: 'center' }}>

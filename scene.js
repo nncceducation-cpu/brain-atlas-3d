@@ -176,6 +176,17 @@
       sphGoal.radius = Math.max(2.6, Math.min(16, sphGoal.radius * (1 + dir * 0.22)));
       idleTimer = 0;
     }
+    function setView(view) {
+      const r = sphGoal.radius;
+      if (view === 'sagittal') { sphGoal.theta = Math.PI / 2; sphGoal.phi = Math.PI / 2; }
+      else if (view === 'coronal') { sphGoal.theta = 0; sphGoal.phi = Math.PI / 2; }
+      else if (view === 'axial') { sphGoal.theta = 0; sphGoal.phi = 0.18; }
+      else { sphGoal.theta = 0.55; sphGoal.phi = Math.PI / 2.25; }
+      sphGoal.radius = r;
+      tgtGoal.set(0, -0.05, 0);
+      autoRot = false;
+      idleTimer = 0;
+    }
     // keyboard modifier toggles pan even mid-drag
     window.addEventListener('keydown', (e) => { if ((e.key === 'Meta' || e.key === 'Control') && dragging) panning = true; });
     window.addEventListener('keyup', (e) => { if (e.key === 'Meta' || e.key === 'Control') panning = false; });
@@ -921,7 +932,7 @@
 
     return {
       THREE: T, scene, camera, renderer, cats,
-      setLayer, setLayers, setHemisphere, focusCategory, focusNode,
+      setLayer, setLayers, setHemisphere, focusCategory, focusNode, setView,
       selectNode, clearSelect, reset, frameSphere, snap, isolate, setSubset, zoom,
       setHighlight, clearHighlight, frameNodes,
       setAutoRotate, setExposure, setBackground, setPalette, setSlice, capturePoster, vr, setVRInfo, setVRControls, setVRNarration,

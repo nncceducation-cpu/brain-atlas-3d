@@ -13,8 +13,10 @@ This browser-based teaching atlas now uses real, individually named anatomical s
 - Left, right, and bilateral hemisphere views
 - Cortex opacity control for deep-anatomy exploration
 - Sagittal, axial, and coronal clipping planes with side flipping
+- One-click sagittal, coronal, axial, and three-quarter anatomical orientations
 - Focus, isolate, presets, guided systems, and lessons
 - Shareable views and high-resolution poster export
+- Keyboard navigation: `1` Explore, `2` Systems, `3` Learn, `/` search, `R` reset
 
 The clipping planes intentionally leave cut faces open. The model contains anatomical surface meshes, not voxel tissue or histology; inventing filled cut textures would imply detail that is not present in the source data.
 
@@ -33,3 +35,5 @@ Serve the repository over HTTP and open `index.html`. The model is loaded at run
 Viewer code is Apache License 2.0. The 3D anatomy assets and derived metadata are CC BY-SA 4.0 and remain under that license. See [LICENSE](LICENSE) and [ATTRIBUTION.md](ATTRIBUTION.md).
 
 The atlas is adapted from [itayinbarr/brainproject](https://github.com/itayinbarr/brainproject), with anatomical clipping added for this deployment.
+
+Interaction ideas were also informed by the public interfaces of the [Neurotorium 3D Brain Atlas](https://neurotorium.org/tool/brain-atlas/) and [NeuroGlance](https://neuroglance.labs.memebu.com/). No models, text, imagery, or source code were copied from those sites.

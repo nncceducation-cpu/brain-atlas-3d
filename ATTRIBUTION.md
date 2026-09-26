@@ -13,3 +13,7 @@ This site incorporates and adapts the open anatomical viewer and model from:
 The viewer source is used under the Apache License 2.0. The 3D anatomy assets (`models/brain.glb`) and derived anatomical metadata are used and redistributed under **Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0)**. Modified versions of these assets remain available under the same license.
 
 This educational model is approximate and is not intended for clinical use.
+
+## Interaction references
+
+The anatomical orientation controls were informed by the public Neurotorium 3D Brain Atlas interface. Keyboard-accessible learning-mode navigation was informed by the public NeuroGlance interface. These are UX references only; this repository does not redistribute their models, imagery, text, or source code.
