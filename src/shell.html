@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interactive 3D Brain Atlas — sliceable, labelled, connected</title>
+<style>/*__CSS__*/</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<svg id="leaders"></svg>
+<div id="labels"></div>
+<div id="tip"></div>
+
+<div class="toggler">
+  <button id="mLeft" title="Toggle structure list">&#9776; Structures</button>
+  <button id="mRight" title="Toggle info panel">&#9432; Info</button>
+</div>
+
+<aside id="left" class="panel">
+  <div class="hd">
+    <h1>3D Brain <span>Atlas</span></h1>
+    <p>Click a structure &middot; drag to orbit &middot; scroll to zoom</p>
+    <div style="margin-top:8px"><input id="q" type="search" placeholder="Search structure or function&hellip;" autocomplete="off"></div>
+  </div>
+  <div class="body" id="list"></div>
+  <div style="padding:8px 10px;border-top:1px solid var(--line);display:flex;gap:6px;flex-wrap:wrap">
+    <button class="mini" id="showAll">Show all</button>
+    <button class="mini" id="hideAll">Hide all</button>
+    <button class="mini" id="onlyCortex">Cortex only</button>
+    <button class="mini" id="onlyDeep">Deep only</button>
+  </div>
+</aside>
+
+<div id="views">
+  <div class="seg">
+    <button data-view="left">Left</button>
+    <button data-view="right">Right</button>
+    <button data-view="front">Front</button>
+    <button data-view="back">Back</button>
+    <button data-view="top">Top</button>
+    <button data-view="bottom">Bottom</button>
+    <button data-view="mid">Mid-sagittal</button>
+    <button data-view="iso">3/4</button>
+  </div>
+</div>
+
+<div id="top">
+  <div class="seg" title="Hemisphere display">
+    <button data-hemi="L">L</button>
+    <button data-hemi="B" class="on">Both</button>
+    <button data-hemi="R">R</button>
+  </div>
+  <div class="seg">
+    <button id="tLab" class="on" title="Toggle labels (L)">Labels</button>
+    <button id="tTract" class="on" title="Toggle white-matter tracts (T)">Tracts</button>
+    <button id="tGhost" title="Make cortex translucent (G)">Ghost cortex</button>
+  </div>
+</div>
+
+<aside id="right" class="panel" >
+  <div id="info">
+    <div class="cbar" id="cbar"></div>
+    <div class="ttl"><h2 id="iname">Select a structure</h2><div class="sub" id="igroup">brain atlas &middot; 43 structures &amp; tracts</div></div>
+    <div class="body" style="padding:0 0 4px">
+      <div class="sec"><h3>Function</h3><p id="ifn">Click any part of the model, a label, or an entry in the list to read what it does, what it connects to, and where it sits.</p></div>
+      <div class="sec"><h3>Connections</h3><div class="chips" id="iconn"></div></div>
+      <div class="sec"><h3>Landmarks &amp; notes</h3><p class="small" id="iloc">&mdash;</p></div>
+    </div>
+    <div class="acts">
+      <button id="btnFocus">Focus</button>
+      <button id="btnIsolate">Isolate</button>
+      <button id="btnConn">Show connections</button>
+      <button id="btnReset">Reset view</button>
+    </div>
+    <div class="hint"><kbd>L</kbd> labels &middot; <kbd>T</kbd> tracts &middot; <kbd>G</kbd> ghost &middot; <kbd>X</kbd><kbd>Y</kbd><kbd>Z</kbd> toggle slice &middot; <kbd>&larr;</kbd><kbd>&rarr;</kbd> move slice &middot; <kbd>Space</kbd> scrub</div>
+  </div>
+</aside>
+
+<div id="bottom" class="panel">
+  <div class="row">
+    <label class="chk" style="width:96px"><input type="checkbox" id="cx"><span>Sagittal</span></label>
+    <input type="range" id="sx" min="-92" max="92" step="1" value="2" disabled>
+    <div class="val" id="vx">&mdash;</div>
+    <button class="mini" id="fx" title="Flip which side is kept">&#8646;</button>
+  </div>
+  <div class="row">
+    <label class="chk" style="width:96px"><input type="checkbox" id="cz"><span>Coronal</span></label>
+    <input type="range" id="sz" min="-100" max="100" step="1" value="0" disabled>
+    <div class="val" id="vz">&mdash;</div>
+    <button class="mini" id="fz" title="Flip which side is kept">&#8646;</button>
+  </div>
+  <div class="row">
+    <label class="chk" style="width:96px"><input type="checkbox" id="cy"><span>Axial</span></label>
+    <input type="range" id="sy" min="-80" max="72" step="1" value="0" disabled>
+    <div class="val" id="vy">&mdash;</div>
+    <button class="mini" id="fy" title="Flip which side is kept">&#8646;</button>
+  </div>
+  <div class="row" style="margin-top:9px">
+    <button id="btnPlay">&#9654; Scrub slice</button>
+    <button id="btnSliceOff">Clear slices</button>
+    <label class="chk"><input type="checkbox" id="tCaps" checked><span>Filled cut face</span></label>
+    <label class="chk"><input type="checkbox" id="tSpin"><span>Auto-rotate</span></label>
+    <div style="margin-left:auto;color:var(--dim);font-size:10.5px" id="sliceInfo">no slice active</div>
+  </div>
+</div>
+
+<div id="orient">coordinates in mm from the mid-commissural point &middot; on a cut face, grey = cortical ribbon, cream = white matter</div>
+
+<div id="load"><div class="in"><b>Building brain model&hellip;</b><p>generating cortical surface, nuclei and tracts</p></div></div>
+
+<script>/*__THREE__*/</script>
+<script>/*__ORBIT__*/</script>
+<script>/*__APP__*/</script>
+</body>
+</html>
