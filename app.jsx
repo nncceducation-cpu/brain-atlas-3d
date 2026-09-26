@@ -1,6 +1,7 @@
 /* Brain Project - app composition, state & scene wiring */
 
 const CAT_ORDER = window.BRAIN.depth; // outer -> inner peel order
+const TISSUE_COLORS = { cortex: '#9A9DA3', white_matter: '#F4F3EE', deep_grey: '#6F747D' };
 const SHORT = {
   meninges_dura: 'Dura & falx', veins_sinuses: 'Sinuses', arteries: 'Arteries', cortex: 'Cortex',
   white_matter: 'White matter', deep_grey: 'Deep grey', diencephalon: 'Diencephalon',
@@ -124,7 +125,7 @@ function useIsMobile(bp) {
 
 function App() {
   Object.assign(window.BRAIN.palette, {
-    cortex:'#E9B8AE', white_matter:'#E8CEC4', deep_grey:'#B883A1', diencephalon:'#8D91CF',
+    cortex:TISSUE_COLORS.cortex, white_matter:TISSUE_COLORS.white_matter, deep_grey:TISSUE_COLORS.deep_grey, diencephalon:'#8D91CF',
     brainstem:'#D7A06D', cerebellum:'#D98F7B', ventricles:'#65C2C5', arteries:'#E35D70',
     veins_sinuses:'#667FC4', cranial_nerves:'#D6C765', meninges_dura:'#B96BB1', tracts:'#62B9A8'
   });
@@ -374,6 +375,10 @@ function App() {
     setSlice(next);
     if (newlyEnabled >= 0) {
       const anatomicalViews = ['sagittal', 'axial', 'coronal'];
+      // A section must include the tissue compartments hidden in the intact
+      // overview; otherwise the space between cortex and nuclei looks hollow.
+      setLayerOn(prev => ({ ...prev, cortex: true, white_matter: true, deep_grey: true,
+        diencephalon: true, ventricles: true, brainstem: true, cerebellum: true }));
       setTweak('autorotate', false);
       if (sceneRef.current) {
         sceneRef.current.setAutoRotate(false);
@@ -522,6 +527,7 @@ function App() {
   };
 
   const applyPalette = (pal) => {
+    pal = { ...pal, ...TISSUE_COLORS };                             // preserve anatomical tissue convention
     Object.assign(window.BRAIN.palette, pal);                       // mutate in place so PAL ref sees it
     const r = document.documentElement.style;
     Object.keys(pal).forEach(k => r.setProperty('--c-' + k, pal[k]));

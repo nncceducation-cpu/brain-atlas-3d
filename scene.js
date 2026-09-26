@@ -19,7 +19,7 @@
   const MAX_OPACITY = { meninges_dura: 0.34, ventricles: 0.9 };
   const VESSEL = new Set(['arteries', 'veins_sinuses', 'cranial_nerves', 'tracts']);
   // tone down the very light masses so the cortex doesn't read as neon-white on the dark stage
-  const CAT_SHADE = { cortex: 0.62, white_matter: 0.8 };
+  const CAT_SHADE = { cortex: 0.72, white_matter: 1.0 };
   function shade(cat, hex) { const c = new T.Color(hex || '#cccccc'); if (CAT_SHADE[cat]) c.multiplyScalar(CAT_SHADE[cat]); return c; }
 
   function extras(o) {
@@ -897,7 +897,7 @@
       const lo = clipBounds[a].x, hi = clipBounds[a].y;
       const t = (Math.max(-100, Math.min(100, Number(value) || 0)) + 100) / 200;
       const center = T.MathUtils.lerp(lo, hi, t);
-      const half = Math.max((hi - lo) * 0.16, 0.12);
+      const half = Math.max((hi - lo) * 0.22, 0.16);
       const lowPlane = clipPlanes[a * 2], highPlane = clipPlanes[a * 2 + 1];
       lowPlane.normal.set(a === 0 ? 1 : 0, a === 1 ? 1 : 0, a === 2 ? 1 : 0);
       highPlane.normal.set(a === 0 ? -1 : 0, a === 1 ? -1 : 0, a === 2 ? -1 : 0);
