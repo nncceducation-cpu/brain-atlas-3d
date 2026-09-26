@@ -1,4 +1,4 @@
-# Interactive 3D Brain Atlas
+# Newborn Brain 3D
 
 **Live site:** https://nncceducation-cpu.github.io/brain-atlas-3d/
 

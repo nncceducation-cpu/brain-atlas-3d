@@ -131,12 +131,12 @@ function ControlPanel(props) {
   const { pos, setPos, collapsed, setCollapsed, mode, setMode } = props;
   const dragRef = React.useRef(null);
   const [layersOpen, setLayersOpen] = React.useState(false);
-  const [viewsOpen, setViewsOpen] = React.useState(true);   // collapse presets to free space for results
+  const [viewsOpen, setViewsOpen] = React.useState(false);  // optional quick views, not a permanent menu wall
   const layersShown = layersOpen || !!props.q;   // a search always reveals the matched tree
   // typing in search auto-collapses the cinematic views (results take the space);
   // clearing it reopens them. Manual toggling still works while a query is active.
   const hasSearch = !!props.search;
-  React.useEffect(() => { setViewsOpen(!hasSearch); }, [hasSearch]);
+  React.useEffect(() => { if (hasSearch) setViewsOpen(false); }, [hasSearch]);
 
   const startDrag = (e) => {
     if (e.target.closest('button') || e.target.closest('input')) return;
@@ -156,8 +156,8 @@ function ControlPanel(props) {
   if (mobile && props.selectedId != null) return null;
   const containerStyle = mobile
     ? { position: 'absolute', left: 8, right: 8, bottom: 8, maxHeight: '44vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 20 }
-    : { position: 'absolute', left: pos.x, top: pos.y, width: 326,
-        height: collapsed ? undefined : 'min(760px, calc(100vh - 32px))', maxHeight: 'calc(100vh - 32px)',
+    : { position: 'absolute', left: pos.x, top: pos.y, width: 520,
+        height: collapsed ? undefined : 'auto', maxHeight: 'min(68vh, 620px)',
         display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 20 };
   return (
     <div className="glass glass-top-hi pop" style={containerStyle}>
@@ -168,7 +168,7 @@ function ControlPanel(props) {
           <Icon name="brain" size={17} sw={1.6} />
         </div>
         <div style={{ flex: 1, lineHeight: 1.1, display: 'flex', alignItems: 'center' }}>
-          <div><div style={{ fontSize: 15.5, fontWeight: 800, letterSpacing: '-0.01em', color: 'var(--ink)' }}>NNCC Brain Atlas</div><div className="mono" style={{ fontSize: 8.5, letterSpacing: '.14em', color: 'var(--accent)', marginTop: 3 }}>ANATOMY WORKSPACE</div></div>
+          <div><div style={{ fontSize: 15.5, fontWeight: 800, letterSpacing: '-0.01em', color: 'var(--ink)' }}>Newborn Brain 3D</div><div className="mono" style={{ fontSize: 8.5, letterSpacing: '.14em', color: 'var(--accent)', marginTop: 3 }}>TERM-EQUIVALENT LEARNING MODEL</div></div>
         </div>
         <Icon name="grip" size={16} style={{ color: 'var(--ink-ghost)' }} />
         <IconBtn name={collapsed ? 'chevDown' : 'chevUp'} title={collapsed ? 'Expand' : 'Collapse'} onClick={() => setCollapsed(!collapsed)} />
@@ -225,7 +225,7 @@ function ControlPanel(props) {
           {/* hemisphere */}
           {!mobile && (
           <div style={{ padding: '0 12px 12px' }}>
-            <div className="eyebrow" style={{ marginBottom: 7 }}>Hemisphere</div>
+            <div className="eyebrow" style={{ marginBottom: 7 }}>Display side</div>
             <Segmented value={props.hemisphere} onChange={props.setHemisphere}
               options={[{ value: 'left', label: 'Left' }, { value: 'both', label: 'Both' }, { value: 'right', label: 'Right' }]} />
           </div>
@@ -237,17 +237,17 @@ function ControlPanel(props) {
               <div className="eyebrow" style={{ marginBottom: 8 }}>Study presets</div>
             ) : (
               <button onClick={() => setViewsOpen(o => !o)} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, marginBottom: viewsOpen ? 8 : 0 }}>
-                <span className="eyebrow" style={{ flex: 1, textAlign: 'left' }}>Study presets</span>
+                <span className="eyebrow" style={{ flex: 1, textAlign: 'left' }}>Quick anatomy views</span>
                 <Icon name={viewsOpen ? 'chevUp' : 'chevDown'} size={14} style={{ color: 'var(--ink-ghost)' }} />
               </button>
             )}
             {(mobile || viewsOpen) && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 }}>
+            <div className="preset-rail" style={{ display: 'flex', gap: 7, overflowX: 'auto', paddingBottom: 3 }}>
               {props.presets.map(p => {
                 const on = props.activePreset === p.id;
                 return (
                   <button key={p.id} onClick={() => props.onPreset(p.id)} style={{
-                    display: 'flex', alignItems: 'center', gap: 7, padding: '8px 10px', borderRadius: 9, minWidth: 0,
+                    display: 'flex', alignItems: 'center', gap: 7, padding: '8px 11px', borderRadius: 99, minWidth: 132,
                     border: '1px solid ' + (on ? 'transparent' : 'var(--hair)'), cursor: 'pointer', textAlign: 'left',
                     background: on ? 'var(--ink)' : 'rgba(255,255,255,0.5)', color: on ? '#fff' : 'var(--ink-soft)',
                     fontFamily: 'var(--font)', fontSize: 12, fontWeight: 600, transition: 'all .15s',
@@ -273,7 +273,7 @@ function ControlPanel(props) {
           <div style={{ display: 'flex', alignItems: 'center', padding: '0 14px 8px', gap: 8 }}>
             <button onClick={() => setLayersOpen(o => !o)} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, border: 'none', background: 'transparent', cursor: 'pointer', padding: 0 }}>
               <Icon name="layers" size={13} style={{ color: 'var(--ink-faint)' }} />
-              <span className="eyebrow">{layersShown ? 'Layers · build your view' : 'View all ' + props.totalCount + ' layers'}</span>
+              <span className="eyebrow">{layersShown ? 'Anatomy index · build your view' : 'Open anatomy index · ' + props.totalCount}</span>
               <Icon name={layersShown ? 'chevUp' : 'chevDown'} size={14} style={{ color: 'var(--ink-ghost)' }} />
             </button>
             {layersShown && <button onClick={props.onShowAll} style={ghostBtn}>All</button>}
@@ -289,7 +289,7 @@ function ControlPanel(props) {
           )}
 
           {/* spacer so the footer sits at the bottom (matches Systems/Learn height) */}
-          {!mobile && !layersShown && <div style={{ flex: 1, minHeight: 0 }} />}
+          {!mobile && !layersShown && <div style={{ padding: '0 14px 12px', fontSize: 10.5, lineHeight: 1.45, color: 'var(--ink-faint)' }}>Term-newborn cortical folds are retained; tissue colours and proportions are an educational visualization, not patient imaging.</div>}
 
           {/* footer */}
           {!mobile && (

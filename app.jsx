@@ -8,7 +8,7 @@ const SHORT = {
 };
 
 const PRESETS = [
-  { id: 'whole',  label: 'Whole brain',     color: 'var(--c-cortex)',         on: ['cortex','cerebellum','brainstem'], cortex: 1,    focus: null },
+  { id: 'whole',  label: 'Newborn overview', color: 'var(--c-cortex)',         on: ['cortex','cerebellum','brainstem'], cortex: 1,    focus: null },
   { id: 'vasc',   label: 'Vasculature',      color: 'var(--c-arteries)',       on: ['arteries','veins_sinuses'],        cortex: 0.12, focus: 'arteries' },
   { id: 'willis', label: 'Circle of Willis', color: 'var(--c-arteries)',       on: ['arteries'],                        cortex: 0.08, focus: 'arteries',
     subset: { arteries: ['Anterior cerebral artery', 'Anterior communicating artery', 'Internal carotid artery', 'Posterior communicating artery', 'Posterior cerebral artery', 'Basilar artery'] } },
@@ -57,7 +57,7 @@ const PALETTES = [
 ];
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-  "accent": "#20C7C9",
+  "accent": "#F29B8F",
   "stage": "deep blue",
   "surface": "frosted",
   "autorotate": true,
@@ -84,6 +84,11 @@ function useIsMobile(bp) {
 }
 
 function App() {
+  Object.assign(window.BRAIN.palette, {
+    cortex:'#E9B8AE', white_matter:'#E8CEC4', deep_grey:'#B883A1', diencephalon:'#8D91CF',
+    brainstem:'#D7A06D', cerebellum:'#D98F7B', ventricles:'#65C2C5', arteries:'#E35D70',
+    veins_sinuses:'#667FC4', cranial_nerves:'#D6C765', meninges_dura:'#B96BB1', tracts:'#62B9A8'
+  });
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
   const mobile = useIsMobile();
   const nodes = window.BRAIN.nodes;
@@ -123,7 +128,7 @@ function App() {
   // ---- state ----
   const [search, setSearch] = React.useState('');
   const [searchSide, setSearchSide] = React.useState('both');  // filter results to one side
-  const [hemisphere, setHemisphere] = React.useState('left');
+  const [hemisphere, setHemisphere] = React.useState('both');
   const [cortexOpacity, setCortexOpacity] = React.useState(1);
   const [layerOn, setLayerOn] = React.useState(() => { const o = {}; CAT_ORDER.forEach(c => o[c] = ['cortex', 'cerebellum', 'brainstem'].includes(c)); return o; });
   const [expanded, setExpanded] = React.useState(() => new Set());
@@ -131,7 +136,7 @@ function App() {
   const [isolatedIds, setIsolatedIds] = React.useState(null);
   const [activePreset, setActivePreset] = React.useState('whole');
   const [collapsed, setCollapsed] = React.useState(false);
-  const [pos, setPos] = React.useState(() => { try { return JSON.parse(localStorage.getItem('nncc_atlas_panel_v2')) || { x: Math.max(16, window.innerWidth - 358), y: 16 }; } catch (e) { return { x: Math.max(16, window.innerWidth - 358), y: 16 }; } });
+  const [pos, setPos] = React.useState(() => { try { return JSON.parse(localStorage.getItem('newborn_brain_console_v1')) || { x: Math.max(16, window.innerWidth - 552), y: 16 }; } catch (e) { return { x: Math.max(16, window.innerWidth - 552), y: 16 }; } });
   const [hover, setHover] = React.useState(null); // {id, x, y}
   const [hint, setHint] = React.useState(true);
   const [posterBusy, setPosterBusy] = React.useState(false);
@@ -179,7 +184,7 @@ function App() {
   const acceptCookies = () => { window.BrainAnalytics && window.BrainAnalytics.grant(); setConsent('granted'); };
   const declineCookies = () => { window.BrainAnalytics && window.BrainAnalytics.deny(); setConsent('denied'); };
 
-  React.useEffect(() => { try { localStorage.setItem('nncc_atlas_panel_v2', JSON.stringify(pos)); } catch (e) {} }, [pos]);
+  React.useEffect(() => { try { localStorage.setItem('newborn_brain_console_v1', JSON.stringify(pos)); } catch (e) {} }, [pos]);
 
   const sceneRef = React.useRef(null);
   const canvasRef = React.useRef(null);
@@ -524,7 +529,7 @@ function App() {
     setPosterBusy(true);
     try {
       if (selectedId != null) { s.focusNode(selectedId); await new Promise(r => setTimeout(r, 750)); }
-      const title = selNode ? selNode.label : 'Whole brain';
+      const title = selNode ? selNode.label : 'Newborn Brain 3D';
       const sub = selNode
         ? ((selNode.crumb && selNode.crumb.length ? selNode.crumb.join('  ·  ') : cats[selNode.category].label)
            + (selNode.side !== 'median' ? '  ·  ' + (selNode.side === 'left' ? 'Left' : 'Right') : ''))
@@ -532,7 +537,7 @@ function App() {
       const url = s.capturePoster(2400, 1500, { title, subtitle: sub, color: selNode ? PAL[selNode.category] : t.accent });
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'brain-project-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.png';
+      a.download = 'newborn-brain-3d-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.png';
       document.body.appendChild(a); a.click(); a.remove();
     } catch (e) { console.error('poster failed', e); }
     setPosterBusy(false);
@@ -546,7 +551,7 @@ function App() {
     else if (mode === 'learn' && openLessonId) { p.set('lesson', openLessonId); }
     else {
       if (activePreset && activePreset !== 'whole') p.set('preset', activePreset);
-      if (hemisphere !== 'left') p.set('hemi', hemisphere);
+      if (hemisphere !== 'both') p.set('hemi', hemisphere);
       if (selectedId != null) {
         p.set('sel', String(selectedId));
         if (focusedId === selectedId) p.set('focus', '1');   // shared from focused mode -> reopen focused

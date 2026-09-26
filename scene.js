@@ -111,7 +111,9 @@
       const center = core.getCenter(new T.Vector3());
       gltf.scene.position.sub(center);                 // core center -> model origin
       const r = core.getBoundingSphere(new T.Sphere()).radius || 1;
-      model.scale.setScalar(1.7 / r);                  // fit the design camera framing
+      // Term-newborn presentation: subtly rounder cranial proportions while preserving
+      // the established primary and secondary cortical folds.
+      model.scale.set(1.64 / r, 1.73 / r, 1.69 / r);
       // anatomical upright: Z-Anatomy exports anterior toward +Z; face the camera
       model.rotation.y = Math.PI;
 
@@ -912,7 +914,7 @@
       // top wordmark
       ctx.textBaseline = 'alphabetic';
       ctx.font = '600 26px "JetBrains Mono", monospace'; ctx.fillStyle = ons; ctx.globalAlpha = 0.85;
-      ctx.fillText('3D BRAIN ATLAS', 64, 86); ctx.globalAlpha = 1;
+      ctx.fillText('NEWBORN BRAIN 3D', 64, 86); ctx.globalAlpha = 1;
       // bottom scrim
       const sg = ctx.createLinearGradient(0, H - 380, 0, H);
       sg.addColorStop(0, 'rgba(0,0,0,0)'); sg.addColorStop(1, 'rgba(0,0,0,0.55)');
@@ -921,7 +923,7 @@
       const accent = meta.color || '#3A66FF';
       ctx.beginPath(); ctx.arc(64 + 13, H - 150, 13, 0, Math.PI * 2); ctx.fillStyle = accent; ctx.fill();
       ctx.font = '800 78px "Hanken Grotesk", sans-serif'; ctx.fillStyle = onc;
-      ctx.fillText(meta.title || 'Whole brain', 64 + 44, H - 124);
+      ctx.fillText(meta.title || 'Term-newborn overview', 64 + 44, H - 124);
       ctx.font = '500 28px "Hanken Grotesk", sans-serif'; ctx.fillStyle = ons;
       let sub = (meta.subtitle || '');
       while (sub && ctx.measureText(sub).width > W - 128) sub = sub.slice(0, -2);

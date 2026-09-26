@@ -1,12 +1,12 @@
-/* NNCC Atlas interface — dark clinical workspace */
+/* Newborn Brain 3D — compact neonatal anatomy console */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root {
   /* --- brand / chrome --- */
-  --accent:        #20C7C9;
-  --accent-press:  #10A6AA;
-  --accent-soft:   rgba(32, 199, 201, 0.15);
-  --accent-ring:   rgba(32, 199, 201, 0.44);
+  --accent:        #F29B8F;
+  --accent-press:  #D97870;
+  --accent-soft:   rgba(242, 155, 143, 0.16);
+  --accent-ring:   rgba(242, 155, 143, 0.44);
 
   /* --- ink (on light glass) --- */
   --ink:        #F2F7FA;
@@ -32,17 +32,17 @@
   --on-stage-soft:   #9aa6bd;
 
   /* --- 11 subsystem colors (mirror of BRAIN.palette) --- */
-  --c-cortex:        #E7DEC9;
-  --c-white_matter:  #D7DDE8;
-  --c-deep_grey:     #B57BE0;
-  --c-diencephalon:  #7E8CF2;
-  --c-brainstem:     #E8B24A;
-  --c-cerebellum:    #F0894E;
-  --c-ventricles:    #3FC8D6;
-  --c-arteries:      #F05068;
-  --c-veins_sinuses: #5078E8;
-  --c-cranial_nerves:#D9D24A;
-  --c-meninges_dura: #CC63CC;
+  --c-cortex:        #E9B8AE;
+  --c-white_matter:  #E8CEC4;
+  --c-deep_grey:     #B883A1;
+  --c-diencephalon:  #8D91CF;
+  --c-brainstem:     #D7A06D;
+  --c-cerebellum:    #D98F7B;
+  --c-ventricles:    #65C2C5;
+  --c-arteries:      #E35D70;
+  --c-veins_sinuses: #667FC4;
+  --c-cranial_nerves:#D6C765;
+  --c-meninges_dura: #B96BB1;
 
   --r-lg: 18px;
   --r-md: 13px;
@@ -90,6 +90,9 @@ canvas.three { position: absolute; inset: 0; display: block; width: 100%; height
 .scroll::-webkit-scrollbar { width: 9px; }
 .scroll::-webkit-scrollbar-thumb { background: rgba(20,24,36,0.18); border-radius: 9px; border: 2px solid transparent; background-clip: padding-box; }
 .scroll::-webkit-scrollbar-thumb:hover { background: rgba(20,24,36,0.30); background-clip: padding-box; }
+.preset-rail { scrollbar-width: thin; scrollbar-color: rgba(242,155,143,.35) transparent; }
+.preset-rail::-webkit-scrollbar { height: 5px; }
+.preset-rail::-webkit-scrollbar-thumb { background: rgba(242,155,143,.35); border-radius: 9px; }
 
 /* ---------- focus ---------- */
 :focus-visible { outline: 2px solid var(--accent-ring); outline-offset: 1px; }
