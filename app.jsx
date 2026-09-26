@@ -57,7 +57,7 @@ const PALETTES = [
 ];
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-  "accent": "#3A66FF",
+  "accent": "#20C7C9",
   "stage": "deep blue",
   "surface": "frosted",
   "autorotate": true,
@@ -65,7 +65,7 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 }/*EDITMODE-END*/;
 
 const STAGES = {
-  'deep blue':  ['#1a2236', '#0c1018', '#06080d', '#E9EDF6', '#9aa6bd'],
+  'deep blue':  ['#173849', '#0A1B29', '#040A11', '#F2F7FA', '#91A9B7'],
   'charcoal':   ['#26262b', '#141417', '#08080a', '#ECECEE', '#9b9ba3'],
   'clinical':   ['#dfe6f0', '#c4cedd', '#aebccf', '#1a2030', '#5a667a'],
 };
@@ -131,7 +131,7 @@ function App() {
   const [isolatedIds, setIsolatedIds] = React.useState(null);
   const [activePreset, setActivePreset] = React.useState('whole');
   const [collapsed, setCollapsed] = React.useState(false);
-  const [pos, setPos] = React.useState(() => { try { return JSON.parse(localStorage.getItem('ba_pos')) || { x: 16, y: 16 }; } catch (e) { return { x: 16, y: 16 }; } });
+  const [pos, setPos] = React.useState(() => { try { return JSON.parse(localStorage.getItem('nncc_atlas_panel_v2')) || { x: Math.max(16, window.innerWidth - 358), y: 16 }; } catch (e) { return { x: Math.max(16, window.innerWidth - 358), y: 16 }; } });
   const [hover, setHover] = React.useState(null); // {id, x, y}
   const [hint, setHint] = React.useState(true);
   const [posterBusy, setPosterBusy] = React.useState(false);
@@ -179,7 +179,7 @@ function App() {
   const acceptCookies = () => { window.BrainAnalytics && window.BrainAnalytics.grant(); setConsent('granted'); };
   const declineCookies = () => { window.BrainAnalytics && window.BrainAnalytics.deny(); setConsent('denied'); };
 
-  React.useEffect(() => { try { localStorage.setItem('ba_pos', JSON.stringify(pos)); } catch (e) {} }, [pos]);
+  React.useEffect(() => { try { localStorage.setItem('nncc_atlas_panel_v2', JSON.stringify(pos)); } catch (e) {} }, [pos]);
 
   const sceneRef = React.useRef(null);
   const canvasRef = React.useRef(null);
@@ -277,8 +277,8 @@ function App() {
     const sg = STAGES[t.stage] || STAGES['deep blue'];
     r.setProperty('--stage-1', sg[0]); r.setProperty('--stage-2', sg[1]); r.setProperty('--stage-3', sg[2]);
     r.setProperty('--on-stage', sg[3]); r.setProperty('--on-stage-soft', sg[4]);
-    if (t.surface === 'solid') { r.setProperty('--glass', 'var(--glass-solid)'); }
-    else { r.setProperty('--glass', 'rgba(249,250,252,0.74)'); }
+    if (t.surface === 'solid') { r.setProperty('--glass', 'rgba(8,20,31,.98)'); }
+    else { r.setProperty('--glass', 'rgba(10,24,36,.90)'); }
   }, [t.accent, t.stage, t.surface]);
 
   // ---- actions ----

@@ -19,7 +19,7 @@ function SelectionCard({ node, color, catLabel, description, related, lessons, o
   const sideLabel = node.side === 'median' ? 'Midline' : (node.side === 'left' ? 'Left' : 'Right');
   const cardStyle = mobile
     ? { position: 'absolute', left: 8, right: 8, bottom: 8, maxHeight: '64vh', overflowY: 'auto', padding: '16px 16px 14px', zIndex: 45 }
-    : { position: 'absolute', right: 16, top: 16, width: 372, maxWidth: 'min(372px, calc(100vw - 32px))', padding: '16px 16px 14px', zIndex: 30 };
+    : { position: 'absolute', left: 16, top: 16, width: 372, maxWidth: 'min(372px, calc(100vw - 32px))', padding: '16px 16px 14px', zIndex: 30 };
   return (
     <div className="glass glass-top-hi pop scroll" key={node.id} style={cardStyle}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>

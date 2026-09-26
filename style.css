@@ -1,38 +1,33 @@
-/* ============================================================
-   Brain Project - design system
-   Clinical-precise chrome · dark specimen stage · modern palette
-   ============================================================ */
-@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* NNCC Atlas interface — dark clinical workspace */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root {
   /* --- brand / chrome --- */
-  --accent:        #3A66FF;
-  --accent-press:  #2B4FE0;
-  --accent-soft:   rgba(58, 102, 255, 0.12);
-  --accent-ring:   rgba(58, 102, 255, 0.40);
+  --accent:        #20C7C9;
+  --accent-press:  #10A6AA;
+  --accent-soft:   rgba(32, 199, 201, 0.15);
+  --accent-ring:   rgba(32, 199, 201, 0.44);
 
   /* --- ink (on light glass) --- */
-  --ink:        #16181F;
-  --ink-soft:   #444A57;
-  --ink-faint:  #767D8C;
-  --ink-ghost:  #A2A8B4;
-  --hair:       rgba(16, 20, 32, 0.09);
-  --hair-2:     rgba(16, 20, 32, 0.06);
+  --ink:        #F2F7FA;
+  --ink-soft:   #B7C7D1;
+  --ink-faint:  #7F97A6;
+  --ink-ghost:  #59717F;
+  --hair:       rgba(162, 211, 221, 0.15);
+  --hair-2:     rgba(162, 211, 221, 0.09);
 
   /* --- light frosted glass --- */
-  --glass:        rgba(249, 250, 252, 0.74);
-  --glass-solid:  rgba(250, 251, 253, 0.96);
-  --glass-hi:     rgba(255, 255, 255, 0.85);
-  --glass-edge:   rgba(255, 255, 255, 0.65);
-  --glass-shadow: 0 1px 2px rgba(10, 14, 28, 0.18),
-                  0 12px 32px -8px rgba(10, 14, 28, 0.42),
-                  0 2px 6px rgba(10, 14, 28, 0.20);
-  --field:        rgba(255, 255, 255, 0.70);
+  --glass:        rgba(10, 24, 36, 0.90);
+  --glass-solid:  rgba(11, 27, 40, 0.98);
+  --glass-hi:     rgba(26, 55, 70, 0.62);
+  --glass-edge:   rgba(132, 194, 207, 0.20);
+  --glass-shadow: 0 18px 54px rgba(0, 5, 12, 0.48), 0 1px 0 rgba(255,255,255,.04) inset;
+  --field:        rgba(5, 17, 27, 0.72);
 
   /* --- specimen stage (dark) --- */
-  --stage-1: #1a2236;   /* center glow */
-  --stage-2: #0c1018;   /* mid */
-  --stage-3: #06080d;   /* edge */
+  --stage-1: #173849;
+  --stage-2: #0A1B29;
+  --stage-3: #040A11;
   --on-stage:        #E9EDF6;
   --on-stage-soft:   #9aa6bd;
 
@@ -52,8 +47,8 @@
   --r-lg: 18px;
   --r-md: 13px;
   --r-sm: 9px;
-  --font: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font: 'Manrope', system-ui, -apple-system, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
 * { box-sizing: border-box; }
@@ -88,9 +83,7 @@ canvas.three { position: absolute; inset: 0; display: block; width: 100%; height
   box-shadow: var(--glass-shadow);
   border-radius: var(--r-lg);
 }
-.glass-top-hi {
-  background-image: linear-gradient(var(--glass-hi), transparent 64px);
-}
+.glass-top-hi { background-image: linear-gradient(var(--glass-hi), transparent 90px); }
 
 /* scrollbars inside panels */
 .scroll { scrollbar-width: thin; scrollbar-color: rgba(20,24,36,0.22) transparent; }

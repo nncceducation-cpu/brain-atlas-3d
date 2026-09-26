@@ -164,11 +164,11 @@ function ControlPanel(props) {
       {/* header (hidden on mobile - bottom sheet shows only the cinematic views) */}
       {!mobile && (
       <div onPointerDown={startDrag} className="noselect" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 12px 12px 14px', cursor: 'grab' }}>
-        <div style={{ width: 30, height: 30, borderRadius: 9, display: 'grid', placeItems: 'center', background: 'var(--ink)', color: '#fff', flex: '0 0 auto' }}>
+        <div style={{ width: 30, height: 30, borderRadius: 15, display: 'grid', placeItems: 'center', background: 'var(--accent)', color: '#041014', flex: '0 0 auto', boxShadow: '0 0 20px var(--accent-soft)' }}>
           <Icon name="brain" size={17} sw={1.6} />
         </div>
         <div style={{ flex: 1, lineHeight: 1.1, display: 'flex', alignItems: 'center' }}>
-          <div style={{ fontSize: 15.5, fontWeight: 800, letterSpacing: '-0.01em', color: 'var(--ink)' }}>3D Brain Atlas</div>
+          <div><div style={{ fontSize: 15.5, fontWeight: 800, letterSpacing: '-0.01em', color: 'var(--ink)' }}>NNCC Brain Atlas</div><div className="mono" style={{ fontSize: 8.5, letterSpacing: '.14em', color: 'var(--accent)', marginTop: 3 }}>ANATOMY WORKSPACE</div></div>
         </div>
         <Icon name="grip" size={16} style={{ color: 'var(--ink-ghost)' }} />
         <IconBtn name={collapsed ? 'chevDown' : 'chevUp'} title={collapsed ? 'Expand' : 'Collapse'} onClick={() => setCollapsed(!collapsed)} />
@@ -181,9 +181,9 @@ function ControlPanel(props) {
           <div style={{ padding: mobile ? '12px 12px 10px' : '0 12px 12px' }}>
             <Segmented value={mode} onChange={setMode}
               options={[
-                { value: 'explore', label: 'Explore', icon: 'compass' },
-                { value: 'systems', label: 'Systems', icon: 'route' },
-                { value: 'learn', label: 'Learn', icon: 'graduation' },
+                { value: 'explore', label: 'Anatomy', icon: 'compass' },
+                { value: 'systems', label: 'Pathways', icon: 'route' },
+                { value: 'learn', label: 'Academy', icon: 'graduation' },
               ]} />
           </div>
 
@@ -234,10 +234,10 @@ function ControlPanel(props) {
           {/* presets - collapsible on desktop so search results can take the space */}
           <div style={{ padding: mobile ? '12px 12px' : '0 12px 12px' }}>
             {mobile ? (
-              <div className="eyebrow" style={{ marginBottom: 8 }}>Cinematic views</div>
+              <div className="eyebrow" style={{ marginBottom: 8 }}>Study presets</div>
             ) : (
               <button onClick={() => setViewsOpen(o => !o)} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, marginBottom: viewsOpen ? 8 : 0 }}>
-                <span className="eyebrow" style={{ flex: 1, textAlign: 'left' }}>Cinematic views</span>
+                <span className="eyebrow" style={{ flex: 1, textAlign: 'left' }}>Study presets</span>
                 <Icon name={viewsOpen ? 'chevUp' : 'chevDown'} size={14} style={{ color: 'var(--ink-ghost)' }} />
               </button>
             )}
