@@ -1,7 +1,7 @@
 /* Brain Project - app composition, state & scene wiring */
 
 const CAT_ORDER = window.BRAIN.depth; // outer -> inner peel order
-const TISSUE_COLORS = { cortex: '#9A9DA3', white_matter: '#F4F3EE', deep_grey: '#6F747D' };
+const TISSUE_COLORS = { cortex: '#8F949B', white_matter: '#C4C9CE', deep_grey: '#747A82' };
 const SHORT = {
   meninges_dura: 'Dura & falx', veins_sinuses: 'Sinuses', arteries: 'Arteries', cortex: 'Cortex',
   white_matter: 'White matter', deep_grey: 'Deep grey', diencephalon: 'Diencephalon',
@@ -20,7 +20,11 @@ const PRESETS = [
     } },
   { id: 'parasag', label: 'Para-sagittal', color: 'var(--c-ventricles)', on: ['cortex','white_matter','deep_grey','diencephalon','ventricles','brainstem','cerebellum'], cortex: 1, focus: null, view: 'sagittal', slice: { axis: 0, value: 24 } },
   { id: 'coronal', label: 'Neonatal coronal', color: 'var(--c-deep_grey)', on: ['cortex','white_matter','deep_grey','diencephalon','ventricles','brainstem','cerebellum'], cortex: 1, focus: null, view: 'coronal', slice: { axis: 2, value: 0 } },
+  { id: 'monro-cor', label: 'Foramen of Monro', color: 'var(--c-ventricles)', on: ['cortex','white_matter','deep_grey','diencephalon','ventricles'], cortex: .72, focus: null, view: 'coronal', slice: { axis: 2, targets: ['Third ventricle','Lateral ventricle','Septum pellucidum'] } },
   { id: 'axial', label: 'Neonatal axial', color: 'var(--c-diencephalon)', on: ['cortex','white_matter','deep_grey','diencephalon','ventricles','brainstem','cerebellum'], cortex: 1, focus: null, view: 'axial', slice: { axis: 1, value: 0 } },
+  { id: 'cc-sag', label: 'Callosum sagittal', color: 'var(--c-white_matter)', on: ['cortex','white_matter','ventricles','diencephalon'], cortex: .34, focus: null, view: 'sagittal', slice: { axis: 0, target: 'Corpus callosum' }, subset: { white_matter: ['Corpus callosum'] } },
+  { id: 'cc-cor', label: 'Callosum coronal', color: 'var(--c-white_matter)', on: ['cortex','white_matter','ventricles','deep_grey'], cortex: .34, focus: null, view: 'coronal', slice: { axis: 2, target: 'Corpus callosum' }, subset: { white_matter: ['Corpus callosum'] } },
+  { id: 'cc-axi', label: 'Callosum axial', color: 'var(--c-white_matter)', on: ['cortex','white_matter','ventricles','deep_grey'], cortex: .34, focus: null, view: 'axial', slice: { axis: 1, target: 'Corpus callosum' }, subset: { white_matter: ['Corpus callosum'] } },
   { id: 'vasc',   label: 'Vasculature',      color: 'var(--c-arteries)',       on: ['arteries','veins_sinuses'],        cortex: 0.12, focus: 'arteries' },
   { id: 'willis', label: 'Circle of Willis', color: 'var(--c-arteries)',       on: ['arteries'],                        cortex: 0.08, focus: 'arteries',
     subset: { arteries: ['Anterior cerebral artery', 'Anterior communicating artery', 'Internal carotid artery', 'Posterior communicating artery', 'Posterior cerebral artery', 'Basilar artery'] } },
@@ -126,7 +130,7 @@ function useIsMobile(bp) {
 function App() {
   Object.assign(window.BRAIN.palette, {
     cortex:TISSUE_COLORS.cortex, white_matter:TISSUE_COLORS.white_matter, deep_grey:TISSUE_COLORS.deep_grey, diencephalon:'#8D91CF',
-    brainstem:'#D7A06D', cerebellum:'#D98F7B', ventricles:'#65C2C5', arteries:'#E35D70',
+    brainstem:'#D7A06D', cerebellum:'#D98F7B', ventricles:'#74C9E8', arteries:'#E35D70',
     veins_sinuses:'#667FC4', cranial_nerves:'#D6C765', meninges_dura:'#B96BB1', tracts:'#62B9A8'
   });
   Object.assign(window.BRAIN.descriptions, {
@@ -412,7 +416,12 @@ function App() {
     setLayerOn(o); setCortexOpacity(p.cortex);
     if (p.slice) {
       setHemisphere('both');
-      setSlice([0,1,2].map(axis => ({ on: axis === p.slice.axis, value: axis === p.slice.axis ? p.slice.value : 0, flip: false })));
+      const targetNodes = (p.slice.targets || (p.slice.target ? [p.slice.target] : []))
+        .flatMap(label => nodes.filter(n => n.label === label));
+      const measured = targetNodes.length && sceneRef.current && sceneRef.current.slicePositionForNodes
+        ? sceneRef.current.slicePositionForNodes(targetNodes.map(n => n.id), p.slice.axis) : null;
+      const sliceValue = Number.isFinite(measured) ? Math.round(measured) : (p.slice.value || 0);
+      setSlice([0,1,2].map(axis => ({ on: axis === p.slice.axis, value: axis === p.slice.axis ? sliceValue : 0, flip: false })));
       setTweak('autorotate', false);
       setTimeout(() => {
         if (sceneRef.current) { sceneRef.current.setAutoRotate(false); sceneRef.current.setView(p.view); }
@@ -833,7 +842,10 @@ function SlicePanel({ value, onChange, onView }) {
     <div className="glass" style={{ position: 'absolute', left: '50%', bottom: 16, transform: 'translateX(-50%)', zIndex: 18,
       width: 470, padding: '10px 13px', borderRadius: 14, color: 'var(--on-stage)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 7 }}>
-        <div className="eyebrow-light" style={{ fontSize: 10, fontWeight: 750, letterSpacing: '.1em' }}>ANATOMICAL CLIPPING</div>
+        <div>
+          <div className="eyebrow-light" style={{ fontSize: 10, fontWeight: 750, letterSpacing: '.1em' }}>ANATOMICAL SECTION</div>
+          <div style={{ fontSize: 8.5, color: 'var(--on-stage-soft)', opacity: .78, marginTop: 2 }}>Fixed atlas plane · camera-independent</div>
+        </div>
         <div style={{ display: 'flex', gap: 4 }}>
           {['sagittal', 'coronal', 'axial', 'three-quarter'].map(v => (
             <button key={v} onClick={() => onView(v)} title={`${v} view`}

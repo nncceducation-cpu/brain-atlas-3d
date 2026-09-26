@@ -33,12 +33,12 @@
 
   /* --- 11 subsystem colors (mirror of BRAIN.palette) --- */
   --c-cortex:        #9A9DA3;
-  --c-white_matter:  #F4F3EE;
-  --c-deep_grey:     #6F747D;
+  --c-white_matter:  #C4C9CE;
+  --c-deep_grey:     #747A82;
   --c-diencephalon:  #8D91CF;
   --c-brainstem:     #D7A06D;
   --c-cerebellum:    #D98F7B;
-  --c-ventricles:    #65C2C5;
+  --c-ventricles:    #74C9E8;
   --c-arteries:      #E35D70;
   --c-veins_sinuses: #667FC4;
   --c-cranial_nerves:#D6C765;

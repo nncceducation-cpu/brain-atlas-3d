@@ -21,6 +21,14 @@
   // tone down the very light masses so the cortex doesn't read as neon-white on the dark stage
   const CAT_SHADE = { cortex: 0.72, white_matter: 1.0 };
   function shade(cat, hex) { const c = new T.Color(hex || '#cccccc'); if (CAT_SHADE[cat]) c.multiplyScalar(CAT_SHADE[cat]); return c; }
+  const STRUCTURE_COLORS = {
+    'Corpus callosum':'#D1D5D9', 'Fornix':'#D8C78A', 'Anterior commissure':'#D8C78A',
+    'Caudate nucleus':'#69A8A6', 'Putamen':'#C69B5A', 'Globus pallidus external':'#A889B7',
+    'Globus pallidus internal':'#8C70A2', 'Nucleus accumbens':'#D58A93', 'Subthalamic nucleus':'#B47E65',
+    'Substantia nigra':'#6D6464', 'Thalamus':'#778CC2', 'Pulvinar':'#7183B2',
+    'Hippocampus':'#78A477', 'Amygdaloid body':'#C97986', 'Optic radiation':'#74AFC1',
+    'Adenohypophysis':'#D98272', 'Neurohypophysis':'#C56F8D', 'Pineal gland':'#B88A67'
+  };
 
   function extras(o) {
     if (o.userData && o.userData.bx_cat != null) return o.userData;
@@ -64,6 +72,7 @@
     function C(cat) { if (!cats[cat]) cats[cat] = { want: true, targetOpacity: 1, meshes: [] }; return cats[cat]; }
     const allMeshes = [];
     const meshById = new Map();             // nodeId -> [meshes]
+    const callosalOutlines = [];
     let loaded = false;
 
     // state requested before the GLB finished loading - applied on load
@@ -81,7 +90,8 @@
         const cat = ex.bx_cat || 'other';
         const id = ex.bx_id != null ? ex.bx_id : null;
         const side = ex.bx_side || 'median';
-        const base = shade(cat, PAL[cat]);
+        const node = id != null && window.BRAIN && window.BRAIN.nodes && window.BRAIN.nodes[id];
+        const base = shade(cat, node && STRUCTURE_COLORS[node.label] || PAL[cat]);
         const be = CAT_EMISS[cat] != null ? CAT_EMISS[cat] : 0.06;
         const mat = new T.MeshStandardMaterial({
           color: base.clone(),
@@ -89,13 +99,25 @@
           metalness: 0.0,
           transparent: true, opacity: 1,
           emissive: base.clone().multiplyScalar(be),
-          side: cat === 'meninges_dura' ? T.DoubleSide : T.FrontSide,
+          // Sectioned tissue must remain visible from the cut side. FrontSide-only
+          // materials made valid white/deep-grey surfaces disappear as the camera
+          // crossed them, creating false anatomical holes.
+          side: VESSEL.has(cat) ? T.FrontSide : T.DoubleSide,
           depthWrite: true,
           clippingPlanes: clipPlanes,
         });
         o.material = mat;
         o.userData = { cat, side, nodeId: id, baseColor: base.clone(), baseEmiss: be,
                        maxOpacity: MAX_OPACITY[cat] != null ? MAX_OPACITY[cat] : 1 };
+        if (node && node.label === 'Corpus callosum') {
+          // Preserve the source geometry, but separate this compact commissure
+          // visually from adjacent cerebral white matter in all three planes.
+          mat.color.set('#D1D5D9'); mat.emissive.set('#D1D5D9'); mat.emissiveIntensity = 0.04;
+          mat.roughness = 0.68; o.renderOrder = 7;
+          const edgeMat = new T.LineBasicMaterial({ color: 0x59616a, transparent: true, opacity: 0.72, clippingPlanes: clipPlanes });
+          const edge = new T.LineSegments(new T.EdgesGeometry(o.geometry, 28), edgeMat);
+          edge.renderOrder = 8; edge.userData.callosalOutline = true; o.add(edge); callosalOutlines.push(edge);
+        }
         C(cat).meshes.push(o); allMeshes.push(o);
         if (id != null) { if (!meshById.has(id)) meshById.set(id, []); meshById.get(id).push(o); }
       });
@@ -897,13 +919,33 @@
       const lo = clipBounds[a].x, hi = clipBounds[a].y;
       const t = (Math.max(-100, Math.min(100, Number(value) || 0)) + 100) / 200;
       const center = T.MathUtils.lerp(lo, hi, t);
-      const half = Math.max((hi - lo) * 0.22, 0.16);
+      // A narrow atlas-space slab approximates one anatomical section while
+      // retaining enough thickness for surface-only source geometry to remain
+      // legible. It never follows the camera.
+      const half = Math.max((hi - lo) * 0.055, 0.07);
       const lowPlane = clipPlanes[a * 2], highPlane = clipPlanes[a * 2 + 1];
       lowPlane.normal.set(a === 0 ? 1 : 0, a === 1 ? 1 : 0, a === 2 ? 1 : 0);
       highPlane.normal.set(a === 0 ? -1 : 0, a === 1 ? -1 : 0, a === 2 ? -1 : 0);
       lowPlane.constant = enabled ? -(center - half) : 1e5;
       highPlane.constant = enabled ? center + half : 1e5;
     }
+
+    // Convert an actual structure's centre to the slider coordinate for any
+    // anatomical axis. Landmark presets can therefore follow source geometry
+    // instead of embedding guessed percentages.
+    function slicePositionForNodes(nodeIds, axis) {
+      const a = Math.max(0, Math.min(2, axis | 0));
+      const meshes = (nodeIds || []).flatMap(nodeId => meshById.get(nodeId) || []);
+      if (!meshes.length) return null;
+      const box = new T.Box3().makeEmpty();
+      meshes.forEach(m => box.expandByObject(m));
+      if (box.isEmpty()) return null;
+      const c = box.getCenter(new T.Vector3());
+      const coord = a === 0 ? c.x : (a === 1 ? c.y : c.z);
+      const lo = clipBounds[a].x, hi = clipBounds[a].y;
+      return Math.max(-100, Math.min(100, ((coord - lo) / Math.max(hi - lo, 1e-6)) * 200 - 100));
+    }
+    function slicePositionForNode(nodeId, axis) { return slicePositionForNodes([nodeId], axis); }
 
     /* ---------------- high-definition poster ---------------- */
     function capturePoster(W, H, meta) {
@@ -959,7 +1001,7 @@
       setLayer, setLayers, setHemisphere, focusCategory, focusNode, setView,
       selectNode, clearSelect, reset, frameSphere, snap, isolate, setSubset, zoom,
       setHighlight, clearHighlight, frameNodes,
-      setAutoRotate, setExposure, setBackground, setPalette, setSlice, capturePoster, vr, setVRInfo, setVRControls, setVRNarration,
+      setAutoRotate, setExposure, setBackground, setPalette, setSlice, slicePositionForNode, slicePositionForNodes, capturePoster, vr, setVRInfo, setVRControls, setVRNarration,
       dispose() { try { const s = renderer.xr.getSession(); if (s) s.end(); } catch (e) {} renderer.setAnimationLoop(null); ro.disconnect(); renderer.dispose(); },
     };
   }

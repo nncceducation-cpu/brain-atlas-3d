@@ -24,7 +24,7 @@ The NNCC interface uses an original dark clinical-workspace design with a right-
 - Shareable views and high-resolution poster export
 - Keyboard navigation: `1` Explore, `2` Systems, `3` Learn, `/` search, `R` reset
 
-The clipping planes intentionally leave cut faces open. The model contains anatomical surface meshes, not voxel tissue or histology; inventing filled cut textures would imply detail that is not present in the source data.
+The anatomical-section controls use thin, camera-independent atlas-space slabs and double-sided tissue surfaces. The present model is still a surface atlas, not a neonatal MRI labelmap: cut faces are therefore not diagnostic MRI sections and fine landmarks absent from the source are explicitly reported rather than invented. A licensed neonatal volumetric labelmap is required for fully filled, voxel-accurate sections.
 
 ## Accuracy and intended use
 
