@@ -305,12 +305,34 @@ function App() {
     s.vr.enter().catch(err => flash('Could not start VR: ' + ((err && err.message) || err)));
   };
   const exitVR = () => { const s = sceneRef.current; if (s) s.vr.exit(); };
+  const changeSlice = (next) => {
+    const newlyEnabled = next.findIndex((v, i) => v.on && !slice[i].on);
+    setSlice(next);
+    if (newlyEnabled >= 0) {
+      const anatomicalViews = ['sagittal', 'axial', 'coronal'];
+      setTweak('autorotate', false);
+      if (sceneRef.current) {
+        sceneRef.current.setAutoRotate(false);
+        sceneRef.current.setView(anatomicalViews[newlyEnabled]);
+      }
+    }
+  };
+  const selectAnatomicalView = (view) => {
+    setTweak('autorotate', false);
+    if (sceneRef.current) {
+      sceneRef.current.setAutoRotate(false);
+      sceneRef.current.setView(view);
+    }
+  };
   const reset = () => {
     setActivePreset('whole'); applyPreset(PRESETS[0], false);
     setHemisphere('both'); setSearchSide('both'); setIsolatedIds(null); setSearch(''); setSelectedId(null); setFocusedId(null);
     setSlice([{ on: false, value: 0, flip: false }, { on: false, value: 0, flip: false }, { on: false, value: 0, flip: false }]);
     setMode('explore'); setActiveSystem(null); setOpenLessonId(null); setPhase(null); setSysPlaying(false); setLessonPlaying(false);
-    if (sceneRef.current) { sceneRef.current.clearHighlight(); sceneRef.current.setView('threequarter'); sceneRef.current.reset(); }
+    if (sceneRef.current) {
+      sceneRef.current.clearHighlight(); sceneRef.current.setView('threequarter'); sceneRef.current.reset();
+      sceneRef.current.setAutoRotate(t.autorotate);
+    }
     flash('Global brain view restored');
   };
 
@@ -669,8 +691,8 @@ function App() {
         onSelect={selectNode} onRelated={focusNode} onFocus={toggleFocus} onIsolate={isolateNode} onClose={() => setSelectedId(null)}
         isolated={!!isolatedIds} focused={selNode && focusedId === selNode.id} onClearIsolate={clearIsolate} mobile={mobile} />
 
-      {!mobile && <SlicePanel value={slice} onChange={setSlice}
-        onView={v => sceneRef.current && sceneRef.current.setView(v)} />}
+      {!mobile && <SlicePanel value={slice} onChange={changeSlice}
+        onView={selectAnatomicalView} />}
 
       {/* SYSTEMS narration (free stepping) */}
       {activeSystem && !lesson && (
