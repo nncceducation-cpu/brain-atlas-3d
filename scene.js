@@ -27,8 +27,17 @@
     'Globus pallidus internal':'#8C70A2', 'Nucleus accumbens':'#D58A93', 'Subthalamic nucleus':'#B47E65',
     'Substantia nigra':'#6D6464', 'Thalamus':'#778CC2', 'Pulvinar':'#7183B2',
     'Hippocampus':'#78A477', 'Amygdaloid body':'#C97986', 'Optic radiation':'#74AFC1',
-    'Adenohypophysis':'#D98272', 'Neurohypophysis':'#C56F8D', 'Pineal gland':'#B88A67'
+    'Adenohypophysis':'#D98272', 'Neurohypophysis':'#C56F8D', 'Pineal gland':'#B88A67',
+    // These structures were historically grouped with the ventricular system,
+    // but neither is CSF. Keep sky blue exclusive to the ventricular cavities.
+    'Choroid plexus':'#B7797F', 'Septum pellucidum':'#B9BEC5'
   };
+  const CSF_SPACES = new Set(['Lateral ventricle', 'Third ventricle', 'Fourth ventricle']);
+  function structureColor(cat, node, palette) {
+    if (node && STRUCTURE_COLORS[node.label]) return STRUCTURE_COLORS[node.label];
+    if (cat === 'ventricles' && (!node || !CSF_SPACES.has(node.label))) return '#B9BEC5';
+    return palette[cat];
+  }
 
   function extras(o) {
     if (o.userData && o.userData.bx_cat != null) return o.userData;
@@ -91,7 +100,7 @@
         const id = ex.bx_id != null ? ex.bx_id : null;
         const side = ex.bx_side || 'median';
         const node = id != null && window.BRAIN && window.BRAIN.nodes && window.BRAIN.nodes[id];
-        const base = shade(cat, node && STRUCTURE_COLORS[node.label] || PAL[cat]);
+        const base = shade(cat, structureColor(cat, node, PAL));
         const be = CAT_EMISS[cat] != null ? CAT_EMISS[cat] : 0.06;
         const mat = new T.MeshStandardMaterial({
           color: base.clone(),
@@ -900,7 +909,8 @@
     /* ---------------- live re-palette ---------------- */
     function setPalette(map) {
       allMeshes.forEach(m => {
-        const hex = map[m.userData.cat]; if (!hex) return;
+        const node = m.userData.nodeId != null && window.BRAIN.nodes[m.userData.nodeId];
+        const hex = structureColor(m.userData.cat, node, map); if (!hex) return;
         const c = shade(m.userData.cat, hex);
         m.userData.baseColor = c.clone();
         m.material.color.copy(c);           // emissive is recomputed each frame from baseColor

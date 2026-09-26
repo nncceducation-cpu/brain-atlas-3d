@@ -780,7 +780,7 @@ function App() {
         isolated={!!isolatedIds} focused={selNode && focusedId === selNode.id} onClearIsolate={clearIsolate} mobile={mobile} />
 
       {!mobile && <SlicePanel value={slice} onChange={changeSlice}
-        onView={selectAnatomicalView} />}
+        onView={selectAnatomicalView} layerOn={layerOn} onToggleLayer={toggleLayer} />}
 
       {/* SYSTEMS narration (free stepping) */}
       {activeSystem && !lesson && (
@@ -830,7 +830,7 @@ function App() {
   );
 }
 
-function SlicePanel({ value, onChange, onView }) {
+function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer }) {
   const names = ['Sagittal', 'Axial', 'Coronal'];
   const directions = ['Right ↔ Left', 'Inferior ↔ Superior', 'Posterior ↔ Anterior'];
   const update = (i, patch) => onChange(value.map((v, j) => {
@@ -868,6 +868,20 @@ function SlicePanel({ value, onChange, onView }) {
           <span className="mono" style={{ fontSize: 10.5, textAlign: 'right', opacity: v.on ? 1 : .45 }}>{v.on ? `${v.value}%` : '—'}</span>
         </div>
       ))}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginTop: 9, paddingTop: 9, borderTop: '1px solid var(--glass-edge)' }}>
+        {[
+          ['cortex', 'Cortex'], ['white_matter', 'White matter'], ['ventricles', 'Ventricles']
+        ].map(([cat, label]) => {
+          const on = !!layerOn[cat];
+          return <button key={cat} onClick={() => onToggleLayer(cat)} aria-pressed={on}
+            title={`${on ? 'Remove' : 'Add'} ${label.toLowerCase()}`}
+            style={{ padding: '6px 7px', borderRadius: 8, border: `1px solid ${on ? 'var(--accent)' : 'var(--glass-edge)'}`,
+              background: on ? 'var(--accent-soft)' : 'rgba(255,255,255,.06)', color: 'var(--on-stage)',
+              fontSize: 9.5, fontWeight: 700, cursor: 'pointer' }}>
+            {on ? '−' : '+'} {label}
+          </button>;
+        })}
+      </div>
       {active && <button onClick={() => onChange(value.map(v => ({ ...v, on: false })))}
         style={{ marginTop: 5, border: 0, background: 'transparent', color: 'var(--on-stage-soft)', fontSize: 11, cursor: 'pointer' }}>Clear slices</button>}
     </div>
