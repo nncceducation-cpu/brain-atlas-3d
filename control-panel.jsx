@@ -294,7 +294,7 @@ function ControlPanel(props) {
           {/* footer */}
           {!mobile && (
           <div style={{ display: 'flex', gap: 8, padding: '10px 12px', borderTop: '1px solid var(--hair-2)' }}>
-            <button onClick={props.onReset} style={footBtn}><Icon name="reset" size={14} /> Reset view</button>
+            <button onClick={props.onReset} title="Restore the global bilateral brain view" style={{ ...footBtn, background: 'var(--accent)', color: '#18232b', borderColor: 'transparent' }}><Icon name="globe" size={14} /> Reset global view</button>
             {props.isolated
               ? <button onClick={props.onClearIsolate} style={{ ...footBtn, background: 'var(--accent)', color: '#fff', border: '1px solid transparent' }}><Icon name="isolate" size={14} /> Exit isolate</button>
               : <button onClick={props.onIsolateMatches} disabled={!props.canIsolate} style={{ ...footBtn, opacity: props.canIsolate ? 1 : 0.4 }}><Icon name="isolate" size={14} /> Isolate</button>}

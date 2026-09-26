@@ -58,7 +58,7 @@ const PALETTES = [
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "accent": "#F29B8F",
-  "stage": "deep blue",
+  "stage": "clinical",
   "surface": "frosted",
   "autorotate": true,
   "glow": 1.06
@@ -282,8 +282,8 @@ function App() {
     const sg = STAGES[t.stage] || STAGES['deep blue'];
     r.setProperty('--stage-1', sg[0]); r.setProperty('--stage-2', sg[1]); r.setProperty('--stage-3', sg[2]);
     r.setProperty('--on-stage', sg[3]); r.setProperty('--on-stage-soft', sg[4]);
-    if (t.surface === 'solid') { r.setProperty('--glass', 'rgba(8,20,31,.98)'); }
-    else { r.setProperty('--glass', 'rgba(10,24,36,.90)'); }
+    if (t.surface === 'solid') { r.setProperty('--glass', 'rgba(248,250,252,.99)'); }
+    else { r.setProperty('--glass', 'rgba(246,249,252,.91)'); }
   }, [t.accent, t.stage, t.surface]);
 
   // ---- actions ----
@@ -307,8 +307,11 @@ function App() {
   const exitVR = () => { const s = sceneRef.current; if (s) s.vr.exit(); };
   const reset = () => {
     setActivePreset('whole'); applyPreset(PRESETS[0], false);
-    setHemisphere('left'); setIsolatedIds(null); setSearch(''); setSelectedId(null); setFocusedId(null);
-    sceneRef.current && sceneRef.current.reset();
+    setHemisphere('both'); setSearchSide('both'); setIsolatedIds(null); setSearch(''); setSelectedId(null); setFocusedId(null);
+    setSlice([{ on: false, value: 0, flip: false }, { on: false, value: 0, flip: false }, { on: false, value: 0, flip: false }]);
+    setMode('explore'); setActiveSystem(null); setOpenLessonId(null); setPhase(null); setSysPlaying(false); setLessonPlaying(false);
+    if (sceneRef.current) { sceneRef.current.clearHighlight(); sceneRef.current.setView('threequarter'); sceneRef.current.reset(); }
+    flash('Global brain view restored');
   };
 
   const applyPreset = (p, doFocus = true) => {

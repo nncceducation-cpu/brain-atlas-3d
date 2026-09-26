@@ -96,8 +96,8 @@ function Segmented({ options, value, onChange, style }) {
           <button key={v} onClick={() => onChange(v)} style={{
             flex: 1, padding: '6px 8px', borderRadius: 8, border: 'none', cursor: 'pointer',
             fontFamily: 'var(--font)', fontSize: 12.5, fontWeight: 600, letterSpacing: '0.01em',
-            background: on ? '#fff' : 'transparent', color: on ? 'var(--ink)' : 'var(--ink-faint)',
-            boxShadow: on ? '0 1px 2px rgba(10,14,28,0.12), 0 0 0 1px rgba(10,14,28,0.04)' : 'none',
+            background: on ? 'var(--accent)' : 'transparent', color: on ? '#18232b' : 'var(--ink-faint)',
+            boxShadow: on ? '0 2px 7px rgba(90,60,55,0.16), 0 0 0 1px rgba(90,60,55,0.08)' : 'none',
             transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
           }}>{o.icon ? <Icon name={o.icon} size={13} /> : null}{lbl}</button>
         );
