@@ -9,7 +9,7 @@ const SHORT = {
 
 const PRESETS = [
   { id: 'whole',  label: 'Newborn overview', color: 'var(--c-cortex)',         on: ['cortex','deep_grey','diencephalon','ventricles','cerebellum','brainstem'], cortex: 1, focus: null },
-  { id: 'midsag', label: 'Neonatal midsagittal', color: 'var(--c-white_matter)', on: ['cortex','white_matter','diencephalon','ventricles','brainstem','cerebellum','arteries','veins_sinuses'], cortex: 1, focus: null,
+  { id: 'midsag', label: 'Mid-sagittal', color: 'var(--c-white_matter)', on: ['cortex','white_matter','diencephalon','ventricles','brainstem','cerebellum','arteries','veins_sinuses'], cortex: 1, focus: null, view: 'sagittal', slice: { axis: 0, value: 0 },
     subset: {
       white_matter: ['Corpus callosum','Fornix','Anterior commissure'],
       ventricles: ['Septum pellucidum','Third ventricle','Fourth ventricle'],
@@ -17,6 +17,9 @@ const PRESETS = [
       arteries: ['Anterior communicating artery','Anterior cerebral artery','Pericallosal artery','Basilar artery','Posterior cerebral artery'],
       veins_sinuses: ['Superior sagittal sinus','Inferior sagittal sinus','Straight sinus'],
     } },
+  { id: 'parasag', label: 'Para-sagittal', color: 'var(--c-ventricles)', on: ['cortex','white_matter','deep_grey','diencephalon','ventricles','brainstem','cerebellum'], cortex: 1, focus: null, view: 'sagittal', slice: { axis: 0, value: 24 } },
+  { id: 'coronal', label: 'Neonatal coronal', color: 'var(--c-deep_grey)', on: ['cortex','white_matter','deep_grey','diencephalon','ventricles','brainstem','cerebellum'], cortex: 1, focus: null, view: 'coronal', slice: { axis: 2, value: 0 } },
+  { id: 'axial', label: 'Neonatal axial', color: 'var(--c-diencephalon)', on: ['cortex','white_matter','deep_grey','diencephalon','ventricles','brainstem','cerebellum'], cortex: 1, focus: null, view: 'axial', slice: { axis: 1, value: 0 } },
   { id: 'vasc',   label: 'Vasculature',      color: 'var(--c-arteries)',       on: ['arteries','veins_sinuses'],        cortex: 0.12, focus: 'arteries' },
   { id: 'willis', label: 'Circle of Willis', color: 'var(--c-arteries)',       on: ['arteries'],                        cortex: 0.08, focus: 'arteries',
     subset: { arteries: ['Anterior cerebral artery', 'Anterior communicating artery', 'Internal carotid artery', 'Posterior communicating artery', 'Posterior cerebral artery', 'Basilar artery'] } },
@@ -40,6 +43,34 @@ const PRESETS = [
   { id: 'nerves', label: 'Cranial nerves',   color: 'var(--c-cranial_nerves)', on: ['cranial_nerves','brainstem'],      cortex: 0.12, focus: 'cranial_nerves' },
   { id: 'dura',   label: 'Meninges & dura',  color: 'var(--c-meninges_dura)',  on: ['meninges_dura','veins_sinuses'],   cortex: 0.30, focus: null },
 ];
+
+const NEONATAL_LANDMARKS = {
+  midsag: {
+    title: 'Mid-sagittal landmarks',
+    labels: ['Corpus callosum','Fornix','Septum pellucidum','Third ventricle','Aqueduct of midbrain','Fourth ventricle','Midbrain','Pons','Medulla oblongata','Mamillary body','Pineal gland','Optic chiasm','Pericallosal artery','Basilar artery','Superior sagittal sinus','Inferior sagittal sinus','Straight sinus'],
+    missing: ['Cavum septi pellucidi as a separate cavity','Interthalamic adhesion','Vein of Galen','Confluence of sinuses']
+  },
+  parasag: {
+    title: 'Para-sagittal landmarks',
+    labels: ['Lateral ventricle','Choroid plexus','Caudate nucleus','Putamen','Globus pallidus external','Globus pallidus internal','Pulvinar','Hippocampus','Parahippocampal gyrus'],
+    missing: ['Internal capsule as a discrete structure','Named frontal, body, occipital, and temporal ventricular horns']
+  },
+  coronal: {
+    title: 'Coronal landmarks',
+    labels: ['Lateral ventricle','Third ventricle','Corpus callosum','Septum pellucidum','Caudate nucleus','Putamen','Globus pallidus external','Globus pallidus internal','Pulvinar','Pons','Choroid plexus'],
+    missing: ['Anterior and posterior limbs of internal capsule','Interthalamic adhesion','Lentiform nucleus as a grouped structure']
+  },
+  axial: {
+    title: 'Axial landmarks',
+    labels: ['Lateral ventricle','Third ventricle','Fourth ventricle','Choroid plexus','Caudate nucleus','Putamen','Globus pallidus external','Globus pallidus internal','Pulvinar','Optic chiasm','Midbrain','Pons','Hippocampus'],
+    missing: ['Internal capsule as a discrete structure','Foramina of Monro, Luschka, and Magendie','Dentate nucleus','Ventricular horns as separate meshes']
+  },
+  vent: {
+    title: 'Ventricular-system landmarks',
+    labels: ['Lateral ventricle','Septum pellucidum','Choroid plexus','Third ventricle','Aqueduct of midbrain','Fourth ventricle'],
+    missing: ['Foramen of Monro','Foramina of Luschka','Foramen of Magendie','Separate ventricular horns']
+  }
+};
 
 // Shuffle palettes - 12 subsystems incl. white-matter tracts. These are deliberately
 // far apart from each other (cortex tone, saturation and overall mood all shift) so a
@@ -110,6 +141,17 @@ function App() {
     'Pericallosal artery': 'The distal anterior cerebral artery coursing around the corpus callosum, a useful vascular landmark along the medial cerebral surface.',
     'Superior sagittal sinus': 'The major midline dural venous sinus along the superior margin of the falx cerebri, draining posteriorly toward the confluence of sinuses.',
     'Straight sinus': 'A midline venous channel at the junction of the falx and tentorium, receiving deep cerebral venous drainage.'
+    ,'Lateral ventricle': 'Paired CSF spaces whose frontal, body, occipital, and temporal portions are assessed in neonatal coronal, sagittal, and axial imaging. Ventricular size and contour are central to evaluation of hemorrhage and post-hemorrhagic ventricular dilatation.'
+    ,'Choroid plexus': 'Vascular tissue that produces CSF. In neonatal imaging it is prominent in the lateral ventricles and is an important landmark when distinguishing normal tissue from intraventricular blood.'
+    ,'Caudate nucleus': 'The caudate head lies beside the frontal horn of the lateral ventricle. The caudothalamic groove at its posterior margin is the classic location of the preterm germinal matrix.'
+    ,'Putamen': 'The lateral component of the lentiform nucleus. Together with the globus pallidus it is relatively prominent in the term newborn and is separated from the caudate and thalamus by the internal capsule.'
+    ,'Globus pallidus external': 'The lateral pallidal segment within the lentiform nucleus. The globus pallidus is relatively prominent in the term newborn and shows early maturation compared with much of the cerebral white matter.'
+    ,'Globus pallidus internal': 'The medial pallidal segment within the lentiform nucleus. Its neonatal imaging appearance must be interpreted with the adjacent putamen, thalamus, and posterior limb of the internal capsule.'
+    ,'Pulvinar': 'The posterior thalamic region. The thalami are relatively large in the term newborn and form the lateral walls of the third ventricle.'
+    ,'Hippocampus': 'A curved medial temporal structure bordering the temporal horn. It is a useful para-sagittal and low axial neonatal landmark and participates in memory circuitry.'
+    ,'Pineal gland': 'A small midline gland arising from the roof of the third ventricle, located between the thalami beneath the posterior corpus callosum. It can be identified on thin neonatal sagittal or coronal imaging.'
+    ,'Mamillary body': 'A paired hypothalamic landmark inferior to the third ventricle and connected to the hippocampal formation through the fornix.'
+    ,'Optic chiasm': 'The midline crossing of the optic pathways, located anterior and inferior to the third ventricle. It is a useful landmark on low axial and midsagittal neonatal views.'
   });
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
   const mobile = useIsMobile();
@@ -363,14 +405,14 @@ function App() {
     setIsolatedIds(null); setSearch(''); setSelectedId(null); setFocusedId(null);  // close any open selection card
     const o = {}; CAT_ORDER.forEach(c => o[c] = p.on.includes(c) || (c === 'cortex' && p.cortex > 0));
     setLayerOn(o); setCortexOpacity(p.cortex);
-    if (p.id === 'midsag') {
+    if (p.slice) {
       setHemisphere('both');
-      setSlice([{ on: true, value: 0, flip: false }, { on: false, value: 0, flip: false }, { on: false, value: 0, flip: false }]);
+      setSlice([0,1,2].map(axis => ({ on: axis === p.slice.axis, value: axis === p.slice.axis ? p.slice.value : 0, flip: false })));
       setTweak('autorotate', false);
       setTimeout(() => {
-        if (sceneRef.current) { sceneRef.current.setAutoRotate(false); sceneRef.current.setView('sagittal'); }
+        if (sceneRef.current) { sceneRef.current.setAutoRotate(false); sceneRef.current.setView(p.view); }
       }, 60);
-    }
+    } else setSlice([{ on: false, value: 0, flip: false }, { on: false, value: 0, flip: false }, { on: false, value: 0, flip: false }]);
     if (doFocus && p.focus) setTimeout(() => sceneRef.current && sceneRef.current.focusCategory(p.focus), 60);
     else if (doFocus) sceneRef.current && sceneRef.current.reset();
   };
@@ -705,6 +747,7 @@ function App() {
         hemisphere={hemisphere} setHemisphere={(v) => { setHemisphere(v); }}
         cortexOpacity={cortexOpacity} setCortexOpacity={(v) => { setCortexOpacity(v); setActivePreset(null); }}
         presets={PRESETS} activePreset={activePreset} onPreset={(id) => applyPreset(PRESETS.find(p => p.id === id))}
+        landmarkProfile={NEONATAL_LANDMARKS[activePreset] || null}
         onReset={reset} onShowAll={showAll} onHideAll={hideAll}
         onIsolateMatches={isolateMatches} canIsolate={matchedIds.size > 0}
         isolated={!!isolatedIds} onClearIsolate={clearIsolate}

@@ -259,15 +259,19 @@ function ControlPanel(props) {
               })}
             </div>
             )}
-            {props.activePreset === 'midsag' && (
+            {props.landmarkProfile && (
               <div style={{ marginTop: 9, padding: '10px 11px', borderRadius: 11, background: 'rgba(242,155,143,.10)', border: '1px solid rgba(217,120,112,.20)' }}>
-                <div className="eyebrow" style={{ marginBottom: 7, color: 'var(--accent-press)' }}>Neonatal midline landmarks</div>
+                <div className="eyebrow" style={{ marginBottom: 7, color: 'var(--accent-press)' }}>{props.landmarkProfile.title}</div>
                 <div className="preset-rail" style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 3 }}>
-                  {['Corpus callosum','Fornix','Septum pellucidum','Third ventricle','Aqueduct of midbrain','Fourth ventricle','Midbrain','Pons','Medulla oblongata'].map(label => {
+                  {props.landmarkProfile.labels.map(label => {
                     const node = window.BRAIN.nodes.find(n => n.label === label);
                     return <button key={label} disabled={!node} onClick={() => node && props.onFocus(node.id)} style={{ flex: '0 0 auto', border: '1px solid var(--hair)', borderRadius: 99, padding: '5px 9px', background: 'rgba(255,255,255,.75)', color: 'var(--ink-soft)', fontSize: 10.5, fontWeight: 650 }}>{label}</button>;
                   })}
                 </div>
+                {!!props.landmarkProfile.missing.length && <details style={{ marginTop: 7, color: 'var(--ink-faint)', fontSize: 10.5 }}>
+                  <summary style={{ cursor: 'pointer', fontWeight: 700 }}>Reference landmarks not represented by this mesh</summary>
+                  <div style={{ lineHeight: 1.55, marginTop: 5 }}>{props.landmarkProfile.missing.join(' · ')}</div>
+                </details>}
               </div>
             )}
           </div>
