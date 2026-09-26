@@ -234,7 +234,7 @@ function ControlPanel(props) {
           {/* presets - collapsible on desktop so search results can take the space */}
           <div style={{ padding: mobile ? '12px 12px' : '0 12px 12px' }}>
             {mobile ? (
-              <div className="eyebrow" style={{ marginBottom: 8 }}>Study presets</div>
+              <div className="eyebrow" style={{ marginBottom: 8 }}>Quick anatomy views</div>
             ) : (
               <button onClick={() => setViewsOpen(o => !o)} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, marginBottom: viewsOpen ? 8 : 0 }}>
                 <span className="eyebrow" style={{ flex: 1, textAlign: 'left' }}>Quick anatomy views</span>
