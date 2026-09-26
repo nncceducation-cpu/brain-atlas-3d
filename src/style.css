@@ -10,7 +10,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 #gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;
   background:radial-gradient(ellipse 80% 70% at 50% 42%,#1b2734 0%,#121822 45%,#080a0e 100%)}
 #leaders{position:fixed;inset:0;pointer-events:none;z-index:4}
-#labels{position:fixed;inset:0;pointer-events:none;z-index:5}
+#labels,#leaders{display:none!important}
 
 /* ---------- labels ---------- */
 .lab{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;

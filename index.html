@@ -16,7 +16,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 #gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;
   background:radial-gradient(ellipse 80% 70% at 50% 42%,#1b2734 0%,#121822 45%,#080a0e 100%)}
 #leaders{position:fixed;inset:0;pointer-events:none;z-index:4}
-#labels{position:fixed;inset:0;pointer-events:none;z-index:5}
+#labels,#leaders{display:none!important}
 
 /* ---------- labels ---------- */
 .lab{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;
@@ -159,7 +159,7 @@ kbd{background:#1b2330;border:1px solid var(--line);border-bottom-width:2px;bord
 <aside id="left" class="panel">
   <div class="hd">
     <h1>3D Brain <span>Atlas</span></h1>
-    <p>Click a structure &middot; drag to orbit &middot; scroll to zoom</p>
+    <p>Hover to identify &middot; click for details &middot; drag to orbit</p>
     <div style="margin-top:8px"><input id="q" type="search" placeholder="Search structure or function&hellip;" autocomplete="off"></div>
   </div>
   <div class="body" id="list"></div>
@@ -191,7 +191,6 @@ kbd{background:#1b2330;border:1px solid var(--line);border-bottom-width:2px;bord
     <button data-hemi="R">R</button>
   </div>
   <div class="seg">
-    <button id="tLab" class="on" title="Toggle labels (L)">Labels</button>
     <button id="tTract" class="on" title="Toggle white-matter tracts (T)">Tracts</button>
     <button id="tGhost" title="Make cortex translucent (G)">Ghost cortex</button>
   </div>
@@ -202,7 +201,7 @@ kbd{background:#1b2330;border:1px solid var(--line);border-bottom-width:2px;bord
     <div class="cbar" id="cbar"></div>
     <div class="ttl"><h2 id="iname">Select a structure</h2><div class="sub" id="igroup">brain atlas &middot; 43 structures &amp; tracts</div></div>
     <div class="body" style="padding:0 0 4px">
-      <div class="sec"><h3>Function</h3><p id="ifn">Click any part of the model, a label, or an entry in the list to read what it does, what it connects to, and where it sits.</p></div>
+      <div class="sec"><h3>Function</h3><p id="ifn">Hover to identify a structure, then click it or use the list to read what it does, what it connects to, and where it sits.</p></div>
       <div class="sec"><h3>Connections</h3><div class="chips" id="iconn"></div></div>
       <div class="sec"><h3>Landmarks &amp; notes</h3><p class="small" id="iloc">&mdash;</p></div>
     </div>
@@ -212,7 +211,7 @@ kbd{background:#1b2330;border:1px solid var(--line);border-bottom-width:2px;bord
       <button id="btnConn">Show connections</button>
       <button id="btnReset">Reset view</button>
     </div>
-    <div class="hint"><kbd>L</kbd> labels &middot; <kbd>T</kbd> tracts &middot; <kbd>G</kbd> ghost &middot; <kbd>X</kbd><kbd>Y</kbd><kbd>Z</kbd> toggle slice &middot; <kbd>&larr;</kbd><kbd>&rarr;</kbd> move slice &middot; <kbd>Space</kbd> scrub</div>
+    <div class="hint">Hover to identify &middot; <kbd>T</kbd> tracts &middot; <kbd>G</kbd> ghost &middot; <kbd>X</kbd><kbd>Y</kbd><kbd>Z</kbd> toggle slice &middot; <kbd>&larr;</kbd><kbd>&rarr;</kbd> move slice &middot; <kbd>Space</kbd> scrub</div>
   </div>
 </aside>
 
@@ -238,13 +237,12 @@ kbd{background:#1b2330;border:1px solid var(--line);border-bottom-width:2px;bord
   <div class="row" style="margin-top:9px">
     <button id="btnPlay">&#9654; Scrub slice</button>
     <button id="btnSliceOff">Clear slices</button>
-    <label class="chk"><input type="checkbox" id="tCaps" checked><span>Filled cut face</span></label>
     <label class="chk"><input type="checkbox" id="tSpin"><span>Auto-rotate</span></label>
     <div style="margin-left:auto;color:var(--dim);font-size:10.5px" id="sliceInfo">no slice active</div>
   </div>
 </div>
 
-<div id="orient">coordinates in mm from the mid-commissural point &middot; on a cut face, grey = cortical ribbon, cream = white matter</div>
+<div id="orient">coordinates in mm from the mid-commissural point &middot; clipping exposes the modelled internal anatomy without synthetic fill</div>
 
 <div id="load"><div class="in"><b>Building brain model&hellip;</b><p>generating cortical surface, nuclei and tracts</p></div></div>
 
@@ -2196,7 +2194,7 @@ var BD = (function () {
   });
 
   /* ---------------- view state ---------------- */
-  var state = { hemi: 'B', vis: {}, ghost: false, tracts: true, labels: 1, caps: true,
+  var state = { hemi: 'B', vis: {}, ghost: false, tracts: true, labels: 0, caps: false,
                 sel: null, focus: null, spin: false };
   BD.ALL.forEach(function (d) { state.vis[d.id] = true; });
 
@@ -2345,7 +2343,7 @@ var BD = (function () {
       cbar.style.background = '#3a475c';
       iname.textContent = 'Select a structure';
       igroup.textContent = 'brain atlas \u00b7 ' + BD.ALL.length + ' structures & tracts';
-      ifn.textContent = 'Click any part of the model, a label, or a list entry to read what it does, what it connects to and where it sits.';
+      ifn.textContent = 'Hover to identify a structure, then click it or use the list to read what it does, what it connects to and where it sits.';
       iloc.textContent = '\u2014';
       iconn.innerHTML = '';
       return;
@@ -2520,12 +2518,6 @@ var BD = (function () {
 
   /* ---------------- toggles ---------------- */
   function flash(el, on) { el.classList.toggle('on', on); }
-  $('tLab').addEventListener('click', function () {
-    state.labels = (state.labels + 1) % 3;
-    this.textContent = ['Labels off', 'Labels: key', 'Labels: all'][state.labels];
-    flash(this, state.labels > 0);
-  });
-  $('tLab').textContent = 'Labels: key';
   $('tTract').addEventListener('click', function () {
     state.tracts = !state.tracts; flash(this, state.tracts); applyVis();
   });
@@ -2604,7 +2596,6 @@ var BD = (function () {
     });
     syncSliceUI(a);
   });
-  $('tCaps').addEventListener('change', function () { state.caps = this.checked; applyVis(); });
   $('tSpin').addEventListener('change', function () { controls.autoRotate = this.checked; });
   $('btnSliceOff').addEventListener('click', function () {
     playing = false; $('btnPlay').classList.remove('on');
@@ -2626,8 +2617,7 @@ var BD = (function () {
   window.addEventListener('keydown', function (e) {
     if (e.target && /input|textarea/i.test(e.target.tagName)) return;
     var k = e.key.toLowerCase();
-    if (k === 'l') $('tLab').click();
-    else if (k === 't') $('tTract').click();
+    if (k === 't') $('tTract').click();
     else if (k === 'g') $('tGhost').click();
     else if (k === 'x' || k === 'y' || k === 'z') {
       var a = { x: 0, y: 1, z: 2 }[k];

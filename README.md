@@ -30,25 +30,25 @@ top (Left, Right, Front, Back, Top, Bottom, Mid-sagittal, 3/4).
 
 **Slice** — the panel at the bottom drives three independent clipping planes:
 sagittal (x), coronal (z) and axial (y). Tick a plane, then drag its slider through the
-brain; `⇄` flips which half is kept. Any combination of the three can be active at once,
-so you can take a corner block out of the brain. *Filled cut face* draws a solid
-cross-section instead of a hollow shell — grey for the cortical ribbon, cream for white
-matter, and each nucleus in its own colour. **Scrub slice** animates the active plane
-back and forth through the whole brain.
+brain; `⇄` flips which half is kept. Any combination of the three can be active at once.
+The planes use clean surface clipping and deliberately avoid an invented solid fill:
+this model is a set of anatomical surfaces, not volumetric MRI, so a synthetic filled
+cross-section would imply tissue detail that the source geometry does not contain.
+**Scrub slice** animates the active plane back and forth through the whole brain.
 
-**Explore** — click any structure (in the 3D view, on a label, or in the left list) to
+**Explore** — hover over any structure to identify it, then click it (or use the left list) to
 load its function, connections and landmarks into the right-hand card. Connection chips
 are clickable, so you can walk the network: hippocampus → fornix → hypothalamus.
 *Show connections* hides everything except the selected structure, everything it talks
 to, and the tracts that link them. *Isolate* leaves only the selection. *Focus* flies the
 camera to it.
 
-**Display** — `Labels` cycles off / key structures / all. `Tracts` toggles the
-white-matter bundles. `Ghost cortex` makes the cortical surface translucent so the deep
+**Display** — structure names appear only on hover so the anatomy stays unobscured.
+`Tracts` toggles the white-matter bundles. `Ghost cortex` makes the cortical surface translucent so the deep
 grey matter shows through without slicing. `L`/`R`/`Both` selects hemispheres, and the
 left panel has per-structure visibility (the ◉ icon) plus *Cortex only* / *Deep only*.
 
-**Keyboard** — `L` labels, `T` tracts, `G` ghost cortex, `X`/`Y`/`Z` toggle a slice
+**Keyboard** — `T` tracts, `G` ghost cortex, `X`/`Y`/`Z` toggle a slice
 plane, `←`/`→` step the active plane by 2 mm, `Space` scrub, `Esc` clear isolation.
 
 ## How the geometry is made, and what that means

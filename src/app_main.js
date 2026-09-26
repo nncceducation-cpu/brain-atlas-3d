@@ -145,7 +145,7 @@
   });
 
   /* ---------------- view state ---------------- */
-  var state = { hemi: 'B', vis: {}, ghost: false, tracts: true, labels: 1, caps: true,
+  var state = { hemi: 'B', vis: {}, ghost: false, tracts: true, labels: 0, caps: false,
                 sel: null, focus: null, spin: false };
   BD.ALL.forEach(function (d) { state.vis[d.id] = true; });
 
@@ -294,7 +294,7 @@
       cbar.style.background = '#3a475c';
       iname.textContent = 'Select a structure';
       igroup.textContent = 'brain atlas \u00b7 ' + BD.ALL.length + ' structures & tracts';
-      ifn.textContent = 'Click any part of the model, a label, or a list entry to read what it does, what it connects to and where it sits.';
+      ifn.textContent = 'Hover to identify a structure, then click it or use the list to read what it does, what it connects to and where it sits.';
       iloc.textContent = '\u2014';
       iconn.innerHTML = '';
       return;
@@ -469,12 +469,6 @@
 
   /* ---------------- toggles ---------------- */
   function flash(el, on) { el.classList.toggle('on', on); }
-  $('tLab').addEventListener('click', function () {
-    state.labels = (state.labels + 1) % 3;
-    this.textContent = ['Labels off', 'Labels: key', 'Labels: all'][state.labels];
-    flash(this, state.labels > 0);
-  });
-  $('tLab').textContent = 'Labels: key';
   $('tTract').addEventListener('click', function () {
     state.tracts = !state.tracts; flash(this, state.tracts); applyVis();
   });
@@ -553,7 +547,6 @@
     });
     syncSliceUI(a);
   });
-  $('tCaps').addEventListener('change', function () { state.caps = this.checked; applyVis(); });
   $('tSpin').addEventListener('change', function () { controls.autoRotate = this.checked; });
   $('btnSliceOff').addEventListener('click', function () {
     playing = false; $('btnPlay').classList.remove('on');
@@ -575,8 +568,7 @@
   window.addEventListener('keydown', function (e) {
     if (e.target && /input|textarea/i.test(e.target.tagName)) return;
     var k = e.key.toLowerCase();
-    if (k === 'l') $('tLab').click();
-    else if (k === 't') $('tTract').click();
+    if (k === 't') $('tTract').click();
     else if (k === 'g') $('tGhost').click();
     else if (k === 'x' || k === 'y' || k === 'z') {
       var a = { x: 0, y: 1, z: 2 }[k];
