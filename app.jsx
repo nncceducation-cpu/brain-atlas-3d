@@ -8,7 +8,7 @@ const SHORT = {
 };
 
 const PRESETS = [
-  { id: 'whole',  label: 'Newborn overview', color: 'var(--c-cortex)',         on: ['cortex','deep_grey','diencephalon','ventricles','cerebellum','brainstem'], cortex: 0.08, focus: null },
+  { id: 'whole',  label: 'Newborn overview', color: 'var(--c-cortex)',         on: ['cortex','deep_grey','diencephalon','ventricles','cerebellum','brainstem'], cortex: 1, focus: null },
   { id: 'vasc',   label: 'Vasculature',      color: 'var(--c-arteries)',       on: ['arteries','veins_sinuses'],        cortex: 0.12, focus: 'arteries' },
   { id: 'willis', label: 'Circle of Willis', color: 'var(--c-arteries)',       on: ['arteries'],                        cortex: 0.08, focus: 'arteries',
     subset: { arteries: ['Anterior cerebral artery', 'Anterior communicating artery', 'Internal carotid artery', 'Posterior communicating artery', 'Posterior cerebral artery', 'Basilar artery'] } },
@@ -129,7 +129,7 @@ function App() {
   const [search, setSearch] = React.useState('');
   const [searchSide, setSearchSide] = React.useState('both');  // filter results to one side
   const [hemisphere, setHemisphere] = React.useState('both');
-  const [cortexOpacity, setCortexOpacity] = React.useState(0.08);
+  const [cortexOpacity, setCortexOpacity] = React.useState(1);
   const [layerOn, setLayerOn] = React.useState(() => { const o = {}; CAT_ORDER.forEach(c => o[c] = ['cortex','deep_grey','diencephalon','ventricles','cerebellum','brainstem'].includes(c)); return o; });
   const [expanded, setExpanded] = React.useState(() => new Set());
   const [selectedId, setSelectedId] = React.useState(null);
