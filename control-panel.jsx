@@ -130,6 +130,7 @@ function LearnMode({ completedSet, onOpenLesson }) {
 function ControlPanel(props) {
   const { pos, setPos, collapsed, setCollapsed, mode, setMode } = props;
   const dragRef = React.useRef(null);
+  const [mobileCompact, setMobileCompact] = React.useState(false);
   const [layersOpen, setLayersOpen] = React.useState(false);
   const [viewsOpen, setViewsOpen] = React.useState(false);  // optional quick views, not a permanent menu wall
   const layersShown = layersOpen || !!props.q;   // a search always reveals the matched tree
@@ -154,6 +155,18 @@ function ControlPanel(props) {
   // on mobile the controls live in the bottom sheet; when a structure is selected the
   // selection card takes that same spot, so we hide the controls behind it
   if (mobile && props.selectedId != null) return null;
+  if (mobile && mobileCompact) {
+    const compactLabel = mode === 'systems' ? 'Pathways' : mode === 'learn' ? 'Academy' : 'Anatomy';
+    return (
+      <div className="glass mobile-control-compact" aria-label={`${compactLabel} controls collapsed`}>
+        <span><Icon name={mode === 'systems' ? 'route' : mode === 'learn' ? 'graduation' : 'brain'} size={16} />{compactLabel}</span>
+        <span className="mobile-control-compact-hint">Tap to continue exploring</span>
+        <button onClick={() => setMobileCompact(false)} title={`Show ${compactLabel} controls`} aria-label={`Show ${compactLabel} controls`}>
+          <Icon name="chevUp" size={17} />
+        </button>
+      </div>
+    );
+  }
   const containerStyle = mobile
     ? { position: 'absolute', left: 8, right: 8, bottom: 64, maxHeight: '52dvh', display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden', zIndex: 20 }
     : { position: 'absolute', left: pos.x, top: pos.y, width: 520,
@@ -178,20 +191,24 @@ function ControlPanel(props) {
       {!collapsed && (
         <React.Fragment>
           {/* mode tabs - Explore · Systems · Learn */}
-          <div style={{ padding: mobile ? '12px 12px 10px' : '0 12px 12px' }}>
-            <Segmented value={mode} onChange={setMode}
+          <div style={{ padding: mobile ? '12px 12px 10px' : '0 12px 12px', display: 'flex', gap: 7, alignItems: 'center' }}>
+            <div style={{ flex: 1, minWidth: 0 }}><Segmented value={mode} onChange={(v) => { setMode(v); if (mobile) setMobileCompact(false); }}
               options={[
                 { value: 'explore', label: 'Anatomy', icon: 'compass' },
                 { value: 'systems', label: 'Pathways', icon: 'route' },
                 { value: 'learn', label: 'Academy', icon: 'graduation' },
-              ]} />
+              ]} /></div>
+            {mobile && <button onClick={() => setMobileCompact(true)} title="Collapse controls to see the brain" aria-label="Collapse controls"
+              style={{ width: 38, height: 38, flex: '0 0 auto', display: 'grid', placeItems: 'center', borderRadius: 10, border: '1px solid var(--glass-edge)', background: 'rgba(255,255,255,.62)', color: 'var(--ink-soft)' }}>
+              <Icon name="chevDown" size={16} />
+            </button>}
           </div>
 
           {(mode === 'systems' || mode === 'learn') && (
             <div style={{ position: 'relative', flex: 1, minHeight: 0, display: 'flex' }}>
               <div className="scroll" style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-                {mode === 'systems' && <SystemsMode activeSystem={props.activeSystem} onStartSystem={props.onStartSystem} />}
-                {mode === 'learn' && <LearnMode completedSet={props.completedSet} onOpenLesson={props.onOpenLesson} />}
+                {mode === 'systems' && <SystemsMode activeSystem={props.activeSystem} onStartSystem={(id) => { props.onStartSystem(id); if (mobile) setMobileCompact(true); }} />}
+                {mode === 'learn' && <LearnMode completedSet={props.completedSet} onOpenLesson={(id) => { props.onOpenLesson(id); if (mobile) setMobileCompact(true); }} />}
               </div>
               <div className="panel-fade" />
             </div>
@@ -242,7 +259,7 @@ function ControlPanel(props) {
               {props.presets.map(p => {
                 const on = props.activePreset === p.id;
                 return (
-                  <button key={p.id} onClick={() => props.onPreset(p.id)} style={{
+                  <button key={p.id} onClick={() => { props.onPreset(p.id); if (mobile) setMobileCompact(true); }} style={{
                     display: 'flex', alignItems: 'center', gap: 7, padding: '8px 11px', borderRadius: 99, minWidth: 132,
                     border: '1px solid ' + (on ? 'transparent' : 'var(--hair)'), cursor: 'pointer', textAlign: 'left',
                     background: on ? 'var(--ink)' : 'rgba(255,255,255,0.5)', color: on ? '#fff' : 'var(--ink-soft)',
@@ -291,7 +308,7 @@ function ControlPanel(props) {
           {/* tree */}
           {layersShown && (
             <div className="scroll" style={{ overflowY: 'auto', padding: '0 8px 8px', flex: mobile ? '0 0 auto' : 1, minHeight: 120, maxHeight: mobile ? 210 : undefined }}>
-              <LayersTree {...props} />
+              <LayersTree {...props} onSelect={(id) => { props.onSelect(id); if (mobile) setMobileCompact(true); }} />
             </div>
           )}
 
