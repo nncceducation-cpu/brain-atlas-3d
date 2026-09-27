@@ -1,7 +1,9 @@
 /* Brain Project - app composition, state & scene wiring */
 
 const CAT_ORDER = window.BRAIN.depth; // outer -> inner peel order
-const TISSUE_COLORS = { cortex: '#A9ADB2', white_matter: '#BEC2C6', deep_grey: '#747A82' };
+// Warm, muted tissue tones based on fixed neonatal dissection specimens.
+// White matter is deliberately only a little lighter than cortical grey.
+const TISSUE_COLORS = { cortex: '#A9827B', white_matter: '#B99991', deep_grey: '#747A82' };
 const SHORT = {
   meninges_dura: 'Dura & falx', veins_sinuses: 'Sinuses', arteries: 'Arteries', cortex: 'Cortex',
   white_matter: 'White matter', deep_grey: 'Deep grey', diencephalon: 'Diencephalon',
@@ -128,9 +130,20 @@ function useIsMobile(bp) {
 }
 
 function App() {
+  const fissureLabels = {
+    70: 'Sylvian fissure (lateral sulcus)', 71: 'Sylvian fissure (lateral sulcus)',
+    309: 'Parieto-occipital fissure', 310: 'Parieto-occipital fissure',
+    56: 'Central fissure (central sulcus)', 57: 'Central fissure (central sulcus)',
+    45: 'Calcarine fissure', 46: 'Calcarine fissure',
+    394: 'Transverse fissure', 395: 'Transverse fissure'
+  };
+  Object.keys(fissureLabels).forEach(id => {
+    const node = window.BRAIN.nodes[id];
+    if (node) { node.displayLabel = fissureLabels[id]; node.aliases = [fissureLabels[id]]; }
+  });
   Object.assign(window.BRAIN.palette, {
     cortex:TISSUE_COLORS.cortex, white_matter:TISSUE_COLORS.white_matter, deep_grey:TISSUE_COLORS.deep_grey, diencephalon:'#8D91CF',
-    brainstem:'#D7A06D', cerebellum:'#A9ADB2', ventricles:'#74C9E8', arteries:'#E35D70',
+    brainstem:'#D7A06D', cerebellum:TISSUE_COLORS.cortex, ventricles:'#74C9E8', arteries:'#E35D70',
     veins_sinuses:'#667FC4', cranial_nerves:'#D6C765', meninges_dura:'#B96BB1', tracts:'#62B9A8'
   });
   Object.assign(window.BRAIN.descriptions, {
@@ -146,6 +159,11 @@ function App() {
     'Pericallosal artery': 'The distal anterior cerebral artery coursing around the corpus callosum, a useful vascular landmark along the medial cerebral surface.',
     'Superior sagittal sinus': 'The major midline dural venous sinus along the superior margin of the falx cerebri, draining posteriorly toward the confluence of sinuses.',
     'Straight sinus': 'A midline venous channel at the junction of the falx and tentorium, receiving deep cerebral venous drainage.'
+    ,'Sylvian fissure (lateral sulcus)': 'The major lateral fissure separating the frontal and parietal lobes above from the temporal lobe below. The insula lies deep within it.'
+    ,'Parieto-occipital fissure': 'A prominent medial fissure separating the parietal and occipital lobes.'
+    ,'Central fissure (central sulcus)': 'The major sulcus separating the frontal lobe and precentral motor cortex from the parietal lobe and postcentral somatosensory cortex.'
+    ,'Calcarine fissure': 'A deep medial occipital fissure whose banks contain the primary visual cortex.'
+    ,'Transverse fissure': 'The deep cleft separating the cerebrum from the cerebellum; the tentorium cerebelli occupies this interval.'
     ,'Lateral ventricle': 'Paired CSF spaces whose frontal, body, occipital, and temporal portions are assessed in neonatal coronal, sagittal, and axial imaging. Ventricular size and contour are central to evaluation of hemorrhage and post-hemorrhagic ventricular dilatation.'
     ,'Choroid plexus': 'Vascular tissue that produces CSF. In neonatal imaging it is prominent in the lateral ventricles and is an important landmark when distinguishing normal tissue from intraventricular blood.'
     ,'Caudate nucleus': 'The caudate head lies beside the frontal horn of the lateral ventricle. The caudothalamic groove at its posterior margin is the classic location of the preterm germinal matrix.'
@@ -170,7 +188,7 @@ function App() {
     return CAT_ORDER.map(cat => {
       const ns = nodes.filter(n => n.category === cat);
       const byRegion = {};
-      ns.forEach(n => { (byRegion[n.region] = byRegion[n.region] || []).push({ id: n.id, label: n.label, side: n.side }); });
+      ns.forEach(n => { (byRegion[n.region] = byRegion[n.region] || []).push({ id: n.id, label: n.displayLabel || n.label, side: n.side }); });
       const regions = Object.keys(byRegion).sort().map(region => ({
         region, items: byRegion[region].sort((a, b) => a.label.localeCompare(b.label) || a.side.localeCompare(b.side)),
       }));
@@ -267,7 +285,8 @@ function App() {
     nodes.forEach(n => {
       // side filter: midline structures have no L/R counterpart, so keep them on either side
       if (searchSide !== 'both' && n.side !== 'median' && n.side !== searchSide) return;
-      if (n.label.toLowerCase().includes(lq) || n.region.toLowerCase().includes(lq) ||
+      if (n.label.toLowerCase().includes(lq) || (n.displayLabel || '').toLowerCase().includes(lq) ||
+          (n.aliases || []).some(alias => alias.toLowerCase().includes(lq)) || n.region.toLowerCase().includes(lq) ||
           (n.crumb || []).some(c => c.toLowerCase().includes(lq)) || n.category.includes(lq)) s.add(n.id);
     });
     return s;
@@ -570,15 +589,16 @@ function App() {
 
   // ---- selection derived ----
   const selNode = selectedId != null ? nodeById[selectedId] : null;
+  const displaySelNode = selNode ? { ...selNode, label: selNode.displayLabel || selNode.label } : null;
   const related = React.useMemo(() => {
     if (!selNode) return [];
     // only suggest structures that are actually visible on the stage: when a single
     // hemisphere is shown, drop the opposite side (median structures show on both).
     const sideOk = (s) => hemisphere === 'both' || s === 'median' || s === hemisphere;
     return nodes.filter(n => n.id !== selNode.id && n.category === selNode.category && n.region === selNode.region && sideOk(n.side))
-      .slice(0, 5).map(n => ({ id: n.id, label: n.label, side: n.side }));
+      .slice(0, 5).map(n => ({ id: n.id, label: n.displayLabel || n.label, side: n.side }));
   }, [selectedId, hemisphere]);
-  const description = selNode ? (DESC[selNode.label] || ('A structure of the ' + cats[selNode.category].label.toLowerCase() + ', located in the ' + selNode.region.replace(/_/g, ' ') + '.')) : '';
+  const description = selNode ? (DESC[selNode.displayLabel || selNode.label] || DESC[selNode.label] || ('A structure of the ' + cats[selNode.category].label.toLowerCase() + ', located in the ' + selNode.region.replace(/_/g, ' ') + '.')) : '';
 
   // mirror the selection into the in-headset 3D info panel (the HTML card isn't visible in VR),
   // including the same Related-structures buttons the web card shows
@@ -586,7 +606,7 @@ function App() {
     const s = sceneRef.current; if (!s || !s.setVRInfo) return;
     if (selNode) {
       const side = selNode.side === 'median' ? 'Midline' : (selNode.side === 'left' ? 'Left' : 'Right');
-      s.setVRInfo({ title: selNode.label, side, body: description, color: PAL[selNode.category], related });
+      s.setVRInfo({ title: selNode.displayLabel || selNode.label, side, body: description, color: PAL[selNode.category], related });
     } else {
       s.setVRInfo(null);
     }
@@ -650,7 +670,7 @@ function App() {
     setPosterBusy(true);
     try {
       if (selectedId != null) { s.focusNode(selectedId); await new Promise(r => setTimeout(r, 750)); }
-      const title = selNode ? selNode.label : 'Newborn Brain 3D';
+      const title = selNode ? (selNode.displayLabel || selNode.label) : 'Newborn Brain 3D';
       const sub = selNode
         ? ((selNode.crumb && selNode.crumb.length ? selNode.crumb.join('  ·  ') : cats[selNode.category].label)
            + (selNode.side !== 'median' ? '  ·  ' + (selNode.side === 'left' ? 'Left' : 'Right') : ''))
@@ -785,7 +805,7 @@ function App() {
 
       {!consent && <ConsentBanner onAccept={acceptCookies} onDecline={declineCookies} />}
 
-      <SelectionCard node={selNode} color={selNode ? PAL[selNode.category] : null}
+      <SelectionCard node={displaySelNode} color={selNode ? PAL[selNode.category] : null}
         catLabel={selNode ? cats[selNode.category].label : ''} description={description} related={related}
         lessons={selNode ? window.SYS.lessonsForLabel(selNode.label) : []}
         onOpenLesson={(id) => { setSelectedId(null); openLesson(id); }}
@@ -826,7 +846,7 @@ function App() {
           display: 'flex', alignItems: 'center', gap: 8, padding: '7px 13px', borderRadius: 99,
           background: 'rgba(8,11,18,0.6)', color: 'var(--on-stage)', fontSize: 12.5, fontWeight: 600, backdropFilter: 'blur(8px)',
           border: '1px solid rgba(255,255,255,0.08)', pointerEvents: 'none' }}>
-          <Dot color={PAL[hoverNode.category]} size={8} />{hoverNode.label}
+          <Dot color={PAL[hoverNode.category]} size={8} />{hoverNode.displayLabel || hoverNode.label}
         </div>
       )}
 

@@ -19,10 +19,10 @@
   const MAX_OPACITY = { meninges_dura: 0.34, ventricles: 1.0 };
   const VESSEL = new Set(['arteries', 'veins_sinuses', 'cranial_nerves', 'tracts']);
   // tone down the very light masses so the cortex doesn't read as neon-white on the dark stage
-  const CAT_SHADE = { cortex: 1.0, white_matter: 1.0 };
+  const CAT_SHADE = { cortex: 0.60, white_matter: 0.66 };
   function shade(cat, hex) { const c = new T.Color(hex || '#cccccc'); if (CAT_SHADE[cat]) c.multiplyScalar(CAT_SHADE[cat]); return c; }
   const STRUCTURE_COLORS = {
-    'Corpus callosum':'#D1D5D9', 'Fornix':'#D8C78A', 'Anterior commissure':'#D8C78A',
+    'Corpus callosum':'#B99991', 'Fornix':'#C7A98F', 'Anterior commissure':'#C7A98F',
     'Caudate nucleus':'#69A8A6', 'Putamen':'#C69B5A', 'Globus pallidus external':'#A889B7',
     'Globus pallidus internal':'#8C70A2', 'Nucleus accumbens':'#D58A93', 'Subthalamic nucleus':'#B47E65',
     'Substantia nigra':'#6D6464', 'Thalamus':'#778CC2', 'Pulvinar':'#6E78B5',
@@ -40,7 +40,7 @@
     if (node && STRUCTURE_COLORS[node.label]) return STRUCTURE_COLORS[node.label];
     if (cat === 'cerebellum') {
       const label = (node && node.label || '').toLowerCase();
-      return label.includes('peduncle') ? '#BEC2C6' : '#A9ADB2';
+      return label.includes('peduncle') ? '#B99991' : (palette.cerebellum || '#A9827B');
     }
     if (cat === 'ventricles' && (!node || !CSF_SPACES.has(node.label))) return '#B9BEC5';
     return palette[cat];

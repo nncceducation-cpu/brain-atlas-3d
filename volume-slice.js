@@ -129,7 +129,22 @@
     const idx = index3(voxel[0], voxel[1], voxel[2], atlas.meta.shape);
     const structure = atlas.structures[idx], tissue = atlas.tissues[idx];
     const atlasLabel = atlas.meta.structureLabels && atlas.meta.structureLabels[String(structure)];
-    return { structure, tissue, label: STRUCTURE_NAMES[structure] || atlasLabel || TISSUE_NAMES[tissue] || null };
+    let label = STRUCTURE_NAMES[structure] || atlasLabel || TISSUE_NAMES[tissue] || null;
+    // Tissue probability edges can extend beyond their hard structural label.
+    // Name those deep-grey voxels by the nearest segmented nucleus rather than
+    // exposing the vague tissue-class fallback to learners.
+    if (tissue === 7 && !STRUCTURE_NAMES[structure]) {
+      const candidates = [40,41,42,43,44,45,46,47,86,87];
+      let nearest = null, best = Infinity;
+      candidates.forEach(id => {
+        const center = atlas.meta.structureCenters[String(id)];
+        if (!center) return;
+        const distance = (voxel[0]-center[0])**2 + (voxel[1]-center[1])**2 + (voxel[2]-center[2])**2;
+        if (distance < best) { best = distance; nearest = id; }
+      });
+      if (nearest) label = STRUCTURE_NAMES[nearest];
+    }
+    return { structure, tissue, label };
   }
 
   function positionForStructures(ids, axis) {

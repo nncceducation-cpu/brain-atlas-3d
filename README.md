@@ -14,6 +14,7 @@ The NNCC interface uses an original dark clinical-workspace design with a right-
 
 - Hundreds of selectable left, right, and midline structures with TA2-style anatomical paths
 - Hover identification without a persistent label cloud
+- Bilateral labels for the Sylvian, central, parieto-occipital, calcarine, and transverse fissures
 - Live search with side filtering
 - Layer groups and per-structure visibility
 - Left, right, and bilateral hemisphere views

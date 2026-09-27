@@ -32,12 +32,12 @@
   --on-stage-soft:   #5F7784;
 
   /* --- 11 subsystem colors (mirror of BRAIN.palette) --- */
-  --c-cortex:        #A9ADB2;
-  --c-white_matter:  #BEC2C6;
+  --c-cortex:        #A9827B;
+  --c-white_matter:  #B99991;
   --c-deep_grey:     #747A82;
   --c-diencephalon:  #8D91CF;
   --c-brainstem:     #D7A06D;
-  --c-cerebellum:    #A9ADB2;
+  --c-cerebellum:    #A9827B;
   --c-ventricles:    #74C9E8;
   --c-arteries:      #E35D70;
   --c-veins_sinuses: #667FC4;
