@@ -108,6 +108,7 @@
     const venousOverlay = new T.Group();
     venousOverlay.visible = false;
     let venousOverlayActive = false;
+    let venographyMesh = null;
     // The Z-Anatomy specimen is turned 180 degrees around its superior axis
     // after import. Apply the same presentation transform to the independently
     // registered venogram so anterior and posterior remain concordant.
@@ -137,6 +138,7 @@
       mesh.position.set(0, -.015, -.01);
       mesh.renderOrder = 12;
       mesh.userData = { cat: 'veins_sinuses', source: 'MRI venography — Nevit Dilmen, CC BY-SA 3.0' };
+      venographyMesh = mesh;
       venousOverlay.add(mesh);
     }, undefined, err => console.error('[BrainScene] Venography mesh failed:', err));
 
@@ -337,26 +339,59 @@
     let hiActive = new Set();   // nodeIds glowing now
     let hiSeen = new Set();     // nodeIds lit earlier in the pathway
     const GHOST_CATS = new Set(['cortex', 'cerebellum', 'brainstem']);
+    function venousLabelAt(worldPoint) {
+      if (!venographyMesh || !worldPoint) return 'Cerebral vein';
+      const p = venographyMesh.worldToLocal(worldPoint.clone());
+      const b = venographyMesh.geometry.boundingBox || (venographyMesh.geometry.computeBoundingBox(), venographyMesh.geometry.boundingBox);
+      const half = b.getSize(new T.Vector3()).multiplyScalar(.5);
+      const x = p.x / Math.max(half.x, 1e-6);      // right/left
+      const ap = p.y / Math.max(half.y, 1e-6);     // anterior/posterior in source scan
+      const si = p.z / Math.max(half.z, 1e-6);     // inferior/superior
+      const side = x < 0 ? 'Left ' : 'Right ';
+      // Ordered from the distinctive dural collectors to progressively smaller
+      // cortical/deep territories. Labels are regional because the venogram is
+      // one continuous patient-derived surface, not separate named meshes.
+      if (Math.abs(x) < .13 && si > .30) return 'Superior sagittal sinus';
+      if (Math.abs(x) < .16 && si < -.16 && ap < .15) return 'Straight sinus / vein of Galen region';
+      if (Math.abs(x) > .32 && si < -.12 && ap < -.18) return side + 'transverse sinus';
+      if (Math.abs(x) > .58 && si < -.28) return side + 'sigmoid sinus';
+      if (Math.abs(x) < .26 && Math.abs(si) < .24) return 'Deep cerebral venous system';
+      if (Math.abs(x) > .48 && Math.abs(si) < .24 && ap > -.18) return side + 'superficial middle cerebral vein';
+      if (si > .18 && Math.abs(x) > .15) return side + 'superior cerebral veins';
+      if (si < -.18 && Math.abs(x) > .20) return side + 'inferior cerebral veins';
+      return side + 'cortical cerebral veins';
+    }
     function pickAt(e) {
       const r = dom.getBoundingClientRect();
       ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1;
       ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
       ray.setFromCamera(ndc, camera);
+      if (venousOverlayActive && venographyMesh && venographyMesh.visible) {
+        const veinHits = ray.intersectObject(venographyMesh, false);
+        if (veinHits.length) return veinHits[0];
+      }
       const cand = allMeshes.filter(m => m.visible && m.material.opacity > 0.14);
       const hits = ray.intersectObjects(cand, false);
-      return hits.length ? hits[0].object : null;
+      return hits.length ? hits[0] : null;
     }
     function hover(e) {
       if (dragging) return;
-      const m = pickAt(e);
+      const hit = pickAt(e);
+      const m = hit && hit.object;
       if (m !== hovered) {
         hovered = m;
         dom.style.cursor = m ? 'pointer' : 'grab';
-        if (opts.onHover) opts.onHover(m ? m.userData.nodeId : null);
+        if (opts.onHover) opts.onHover(m ? m.userData.nodeId : null,
+          m === venographyMesh ? { label: venousLabelAt(hit.point), category: 'veins_sinuses' } : null);
+      } else if (m === venographyMesh && opts.onHover) {
+        // A single connected scan mesh spans multiple named territories; update
+        // the label as the pointer moves between them even though the mesh is unchanged.
+        opts.onHover(null, { label: venousLabelAt(hit.point), category: 'veins_sinuses' });
       }
     }
     function click(e) {
-      const m = pickAt(e);
+      const hit = pickAt(e);
+      const m = hit && hit.object;
       if (opts.onPick) opts.onPick(m ? m.userData.nodeId : null, m);
     }
 

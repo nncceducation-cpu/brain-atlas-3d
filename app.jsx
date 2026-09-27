@@ -315,7 +315,7 @@ function App() {
         }
         if (id != null) { setSelectedId(id); setHint(false); } else setSelectedId(null);
       },
-      onHover: (id) => setHover(h => id != null ? { id } : null),
+      onHover: (id, meta) => setHover(h => meta ? meta : (id != null ? { id } : null)),
       onVR: (active) => setVrActive(active),
       onVRAction: (type, val) => vrActionRef.current && vrActionRef.current(type, val),
     });
@@ -795,7 +795,7 @@ function App() {
     return () => window.removeEventListener('keydown', h);
   }, [isolatedIds]);
 
-  const hoverNode = hover ? nodeById[hover.id] : null;
+  const hoverNode = hover ? (hover.label ? hover : nodeById[hover.id]) : null;
 
   return (
     <React.Fragment>
