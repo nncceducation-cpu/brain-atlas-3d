@@ -118,7 +118,7 @@ const STAGES = {
 
 function useIsMobile(bp) {
   bp = bp || 640;
-  const q = '(max-width: ' + bp + 'px)';
+  const q = '(max-width: ' + bp + 'px), (max-height: 520px) and (max-width: 950px)';
   const [m, setM] = React.useState(() => window.matchMedia(q).matches);
   React.useEffect(() => {
     const mq = window.matchMedia(q);
@@ -223,6 +223,7 @@ function App() {
   const [isolatedIds, setIsolatedIds] = React.useState(null);
   const [activePreset, setActivePreset] = React.useState('whole');
   const [collapsed, setCollapsed] = React.useState(false);
+  const [mobileTool, setMobileTool] = React.useState('view');
   const [pos, setPos] = React.useState(() => { try { return JSON.parse(localStorage.getItem('newborn_brain_console_v1')) || { x: Math.max(16, window.innerWidth - 552), y: 16 }; } catch (e) { return { x: Math.max(16, window.innerWidth - 552), y: 16 }; } });
   const [hover, setHover] = React.useState(null); // {id, x, y}
   const [hint, setHint] = React.useState(true);
@@ -821,7 +822,7 @@ function App() {
         </div>
       )}
 
-      <ControlPanel
+      {(!mobile || mobileTool === 'anatomy') && <ControlPanel
         mode={mode} setMode={switchMode}
         activeSystem={activeSystem} onStartSystem={startSystem}
         completedSet={completed} onOpenLesson={openLesson}
@@ -841,7 +842,7 @@ function App() {
         isolated={!!isolatedIds} onClearIsolate={clearIsolate}
         pos={pos} setPos={setPos} collapsed={collapsed} setCollapsed={setCollapsed}
         q={q} mobile={mobile}
-      />
+      />}
 
       {!consent && <ConsentBanner onAccept={acceptCookies} onDecline={declineCookies} />}
 
@@ -852,10 +853,24 @@ function App() {
         onSelect={selectNode} onRelated={focusNode} onFocus={toggleFocus} onIsolate={isolateNode} onClose={() => setSelectedId(null)}
         isolated={!!isolatedIds} focused={selNode && focusedId === selNode.id} onClearIsolate={clearIsolate} mobile={mobile} />
 
-      {!mobile && <SlicePanel value={slice} onChange={changeSlice}
+      {(!mobile || mobileTool === 'slices') && <SlicePanel value={slice} onChange={changeSlice}
         onView={selectAnatomicalView} layerOn={layerOn} onToggleLayer={toggleLayer}
         arterialMode={arterialMode} onToggleArterialMode={toggleArterialMode}
-        venousMode={venousMode} onToggleVenousMode={toggleVenousMode} />}
+        venousMode={venousMode} onToggleVenousMode={toggleVenousMode} mobile={mobile} />}
+
+      {mobile && !selectedId && (
+        <nav className="mobile-dock glass" aria-label="Mobile atlas tools">
+          <button className={mobileTool === 'view' ? 'active' : ''} onClick={() => setMobileTool('view')}>
+            <Icon name="eye" size={17} /><span>View</span>
+          </button>
+          <button className={mobileTool === 'anatomy' ? 'active' : ''} onClick={() => setMobileTool('anatomy')}>
+            <Icon name="brain" size={17} /><span>Anatomy</span>
+          </button>
+          <button className={mobileTool === 'slices' ? 'active' : ''} onClick={() => setMobileTool('slices')}>
+            <Icon name="layers" size={17} /><span>MRI slices</span>
+          </button>
+        </nav>
+      )}
 
       {/* SYSTEMS narration (free stepping) */}
       {activeSystem && !lesson && (
@@ -998,7 +1013,7 @@ function NeonatalSliceView({ slice, layerOn, arterialMode, venousMode }) {
   );
 }
 
-function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer, arterialMode, onToggleArterialMode, venousMode, onToggleVenousMode }) {
+function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer, arterialMode, onToggleArterialMode, venousMode, onToggleVenousMode, mobile }) {
   const names = ['Sagittal', 'Axial', 'Coronal'];
   const directions = ['Right ↔ Left', 'Inferior ↔ Superior', 'Posterior ↔ Anterior'];
   const update = (i, patch) => onChange(value.map((v, j) => {
@@ -1007,8 +1022,9 @@ function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer, arterialM
   }));
   const active = value.some(v => v.on);
   return (
-    <div className="glass" style={{ position: 'absolute', right: 16, bottom: 16, zIndex: 18,
-      width: 'min(470px, calc(100vw - 32px))', padding: '10px 13px', borderRadius: 14, color: 'var(--on-stage)' }}>
+    <div className={`glass ${mobile ? 'mobile-slice-panel' : ''}`} style={{ position: 'absolute', right: mobile ? 8 : 16, bottom: mobile ? 64 : 16, zIndex: 18,
+      width: mobile ? 'calc(100vw - 16px)' : 'min(470px, calc(100vw - 32px))', padding: '10px 13px', borderRadius: 14, color: 'var(--on-stage)',
+      maxHeight: mobile ? '52dvh' : undefined, overflowY: mobile ? 'auto' : undefined }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 7 }}>
         <div>
           <div className="eyebrow-light" style={{ fontSize: 10, fontWeight: 750, letterSpacing: '.1em' }}>ANATOMICAL SECTION</div>

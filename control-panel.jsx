@@ -155,7 +155,7 @@ function ControlPanel(props) {
   // selection card takes that same spot, so we hide the controls behind it
   if (mobile && props.selectedId != null) return null;
   const containerStyle = mobile
-    ? { position: 'absolute', left: 8, right: 8, bottom: 8, maxHeight: '44vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 20 }
+    ? { position: 'absolute', left: 8, right: 8, bottom: 64, maxHeight: '52dvh', display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden', zIndex: 20 }
     : { position: 'absolute', left: pos.x, top: pos.y, width: 520,
         height: collapsed ? undefined : 'auto', maxHeight: 'min(68vh, 620px)',
         display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 20 };
@@ -200,7 +200,6 @@ function ControlPanel(props) {
           {mode === 'explore' && (
           <React.Fragment>
           {/* search */}
-          {!mobile && (
           <div style={{ padding: '0 12px 12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '9px 11px', borderRadius: 11, background: 'var(--field)', border: '1px solid var(--hair)' }}>
               <Icon name="search" size={15} style={{ color: 'var(--ink-faint)', flex: '0 0 auto' }} />
@@ -220,16 +219,13 @@ function ControlPanel(props) {
               </div>
             )}
           </div>
-          )}
 
           {/* hemisphere */}
-          {!mobile && (
           <div style={{ padding: '0 12px 12px' }}>
             <div className="eyebrow" style={{ marginBottom: 7 }}>Display side</div>
             <Segmented value={props.hemisphere} onChange={props.setHemisphere}
               options={[{ value: 'left', label: 'Left' }, { value: 'both', label: 'Both' }, { value: 'right', label: 'Right' }]} />
           </div>
-          )}
 
           {/* presets - collapsible on desktop so search results can take the space */}
           <div style={{ padding: mobile ? '12px 12px' : '0 12px 12px' }}>
@@ -277,14 +273,11 @@ function ControlPanel(props) {
           </div>
 
           {/* cortex opacity */}
-          {!mobile && (
           <div style={{ padding: '0 14px 14px' }}>
             <Slider label="Cortex opacity" value={props.cortexOpacity} onChange={props.setCortexOpacity} color="var(--c-cortex)" />
           </div>
-          )}
 
           {/* layers header - collapsed by default so presets stay the spotlight */}
-          {!mobile && (
           <div style={{ display: 'flex', alignItems: 'center', padding: '0 14px 8px', gap: 8 }}>
             <button onClick={() => setLayersOpen(o => !o)} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, border: 'none', background: 'transparent', cursor: 'pointer', padding: 0 }}>
               <Icon name="layers" size={13} style={{ color: 'var(--ink-faint)' }} />
@@ -294,11 +287,10 @@ function ControlPanel(props) {
             {layersShown && <button onClick={props.onShowAll} style={ghostBtn}>All</button>}
             {layersShown && <button onClick={props.onHideAll} style={ghostBtn}>None</button>}
           </div>
-          )}
 
           {/* tree */}
-          {!mobile && layersShown && (
-            <div className="scroll" style={{ overflowY: 'auto', padding: '0 8px 8px', flex: 1, minHeight: 120 }}>
+          {layersShown && (
+            <div className="scroll" style={{ overflowY: 'auto', padding: '0 8px 8px', flex: mobile ? '0 0 auto' : 1, minHeight: 120, maxHeight: mobile ? 210 : undefined }}>
               <LayersTree {...props} />
             </div>
           )}
@@ -307,14 +299,12 @@ function ControlPanel(props) {
           {!mobile && !layersShown && <div style={{ padding: '0 14px 12px', fontSize: 10.5, lineHeight: 1.45, color: 'var(--ink-faint)' }}>Term-newborn cortical folds are retained; tissue colours and proportions are an educational visualization, not patient imaging.</div>}
 
           {/* footer */}
-          {!mobile && (
           <div style={{ display: 'flex', gap: 8, padding: '10px 12px', borderTop: '1px solid var(--hair-2)' }}>
             <button onClick={props.onReset} title="Restore the global bilateral brain view" style={{ ...footBtn, background: 'var(--accent)', color: '#18232b', borderColor: 'transparent' }}><Icon name="globe" size={14} /> Reset global view</button>
             {props.isolated
               ? <button onClick={props.onClearIsolate} style={{ ...footBtn, background: 'var(--accent)', color: '#fff', border: '1px solid transparent' }}><Icon name="isolate" size={14} /> Exit isolate</button>
               : <button onClick={props.onIsolateMatches} disabled={!props.canIsolate} style={{ ...footBtn, opacity: props.canIsolate ? 1 : 0.4 }}><Icon name="isolate" size={14} /> Isolate</button>}
           </div>
-          )}
           </React.Fragment>
           )}
         </React.Fragment>
