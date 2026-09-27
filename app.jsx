@@ -774,9 +774,9 @@ function App() {
       {hint && consent && !mobile && !slice.some(v => v.on) && (
         <div className="pop" style={{ position: 'absolute', bottom: 18, left: '50%', transform: 'translateX(-50%)', zIndex: 12,
           display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 99,
-          background: 'rgba(8,11,18,0.55)', color: 'var(--on-stage)', fontSize: 12.5, fontWeight: 500, backdropFilter: 'blur(8px)',
+          background: 'rgba(8,11,18,0.72)', color: '#F8FAFC', fontSize: 12.5, fontWeight: 600, backdropFilter: 'blur(8px)',
           border: '1px solid rgba(255,255,255,0.08)' }}>
-          <Icon name="crosshair" size={14} style={{ color: 'var(--on-stage-soft)' }} />
+          <Icon name="crosshair" size={14} style={{ color: '#D5DEE7' }} />
           Drag to rotate · scroll to zoom · click a structure to inspect
         </div>
       )}
@@ -844,7 +844,7 @@ function App() {
       {hoverNode && !selNode && (
         <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 14,
           display: 'flex', alignItems: 'center', gap: 8, padding: '7px 13px', borderRadius: 99,
-          background: 'rgba(8,11,18,0.6)', color: 'var(--on-stage)', fontSize: 12.5, fontWeight: 600, backdropFilter: 'blur(8px)',
+          background: 'rgba(8,11,18,0.82)', color: '#FFFFFF', fontSize: 12.5, fontWeight: 700, backdropFilter: 'blur(8px)',
           border: '1px solid rgba(255,255,255,0.08)', pointerEvents: 'none' }}>
           <Dot color={PAL[hoverNode.category]} size={8} />{hoverNode.displayLabel || hoverNode.label}
         </div>
@@ -1029,7 +1029,7 @@ function Toast({ msg }) {
   return (
     <div className="pop" style={{ position: 'absolute', top: 18, left: '50%', transform: 'translateX(-50%)', zIndex: 60,
       display: 'flex', alignItems: 'center', gap: 8, padding: '9px 15px', borderRadius: 99,
-      background: 'rgba(8,11,18,0.72)', color: 'var(--on-stage)', fontSize: 12.5, fontWeight: 600, backdropFilter: 'blur(10px)',
+      background: 'rgba(8,11,18,0.82)', color: '#FFFFFF', fontSize: 12.5, fontWeight: 650, backdropFilter: 'blur(10px)',
       border: '1px solid rgba(255,255,255,0.1)' }}>
       <Icon name="checkCircle" size={14} style={{ color: '#5fd08a' }} /> {msg}
     </div>
