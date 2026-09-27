@@ -25,6 +25,13 @@
     pica:{ label:'Posterior inferior cerebellar artery territory', color:[194,85,151,.62] },
     vb:  { label:'Vertebrobasilar perforator territory', color:[89,103,189,.64] }
   };
+  const VENOUS_TERRITORIES = {
+    sss: { label:'Superior cerebral veins → superior sagittal sinus', color:[85,127,194,.56] },
+    smcv:{ label:'Superficial middle cerebral vein → cavernous sinus', color:[73,161,184,.58] },
+    labbe:{ label:'Vein of Labbé → transverse sinus', color:[77,166,143,.58] },
+    deep:{ label:'Deep veins → internal cerebral veins / vein of Galen', color:[138,104,177,.64] },
+    posterior:{ label:'Posterior fossa veins → transverse / petrosal sinuses', color:[139,120,159,.60] }
+  };
 
   async function inflate(path) {
     const response = await fetch(BASE + path);
@@ -106,6 +113,27 @@
     return 'mca';
   }
 
+  function venousTerritoryFor(x, y, z, structure, tissue, meta) {
+    if (!tissue || tissue === 1 || tissue === 4 || tissue === 5 || structure === 49 || structure === 50) return null;
+    const b = meta.brainBounds;
+    const nx = (x - b[0][0]) / (b[0][1] - b[0][0]);
+    const ap = (y - b[1][0]) / (b[1][1] - b[1][0]);
+    const si = (z - b[2][0]) / (b[2][1] - b[2][0]);
+    const medial = Math.abs(nx - .5) * 2;
+    if (tissue === 6 || tissue === 8 || structure === 17 || structure === 18 || structure === 19) return 'posterior';
+    if (tissue === 7 || tissue === 9 || (structure >= 40 && structure <= 48) || structure === 86 || structure === 87) return 'deep';
+    // Periventricular/deep white matter converges on the internal cerebral,
+    // thalamostriate and basal venous systems rather than surface collectors.
+    if (tissue === 3 && medial < .62 && si > .28 && si < .72) return 'deep';
+    // Superior and medial convexities drain through bridging veins to the SSS.
+    if (si > .62 || medial < .24) return 'sss';
+    // Posteroinferior lateral cortex follows Labbé toward the transverse sinus.
+    if (ap < .48 || si < .34) return 'labbe';
+    // Remaining lateral frontal, parietal and temporal cortex follows the
+    // superficial middle (Sylvian) venous pathway anteriorly.
+    return 'smcv';
+  }
+
   function render(target, atlas, axis, percent, visible) {
     const { meta, intensity, tissues, structures } = atlas;
     const shape = meta.shape;
@@ -146,7 +174,10 @@
         let g = outside || removed ? 228 : value;
         let b = outside || removed ? 236 : value;
         const territory = visible.arterialTerritories && !outside && !removed ? territoryFor(x,y,z,structure,tissue,meta) : null;
-        const overlay = outside || removed ? null : (territory ? TERRITORIES[territory].color : (visible.arterialTerritories ? null : colorFor(structure, tissue)));
+        const venousTerritory = visible.venousTerritories && !outside && !removed ? venousTerritoryFor(x,y,z,structure,tissue,meta) : null;
+        const overlay = outside || removed ? null : (territory ? TERRITORIES[territory].color :
+          venousTerritory ? VENOUS_TERRITORIES[venousTerritory].color :
+          ((visible.arterialTerritories || visible.venousTerritories) ? null : colorFor(structure, tissue)));
         if (overlay) {
           const a = overlay[3];
           r = Math.round(value * (1-a) + overlay[0] * a);
@@ -157,7 +188,7 @@
       }
     }
     ctx.putImageData(image, 0, 0);
-    return { axis, sliceIndex, geom, arterialTerritories: !!visible.arterialTerritories };
+    return { axis, sliceIndex, geom, arterialTerritories: !!visible.arterialTerritories, venousTerritories: !!visible.venousTerritories };
   }
 
   function voxelAt(display, u, v, atlas) {
@@ -169,11 +200,12 @@
     const structure = atlas.structures[idx], tissue = atlas.tissues[idx];
     const atlasLabel = atlas.meta.structureLabels && atlas.meta.structureLabels[String(structure)];
     const territory = display.arterialTerritories ? territoryFor(voxel[0],voxel[1],voxel[2],structure,tissue,atlas.meta) : null;
-    let label = territory ? TERRITORIES[territory].label : (STRUCTURE_NAMES[structure] || atlasLabel || TISSUE_NAMES[tissue] || null);
+    const venousTerritory = display.venousTerritories ? venousTerritoryFor(voxel[0],voxel[1],voxel[2],structure,tissue,atlas.meta) : null;
+    let label = territory ? TERRITORIES[territory].label : venousTerritory ? VENOUS_TERRITORIES[venousTerritory].label : (STRUCTURE_NAMES[structure] || atlasLabel || TISSUE_NAMES[tissue] || null);
     // Tissue probability edges can extend beyond their hard structural label.
     // Name those deep-grey voxels by the nearest segmented nucleus rather than
     // exposing the vague tissue-class fallback to learners.
-    if (!display.arterialTerritories && tissue === 7 && !STRUCTURE_NAMES[structure]) {
+    if (!display.arterialTerritories && !display.venousTerritories && tissue === 7 && !STRUCTURE_NAMES[structure]) {
       const candidates = [40,41,42,43,44,45,46,47,86,87];
       let nearest = null, best = Infinity;
       candidates.forEach(id => {
@@ -198,5 +230,5 @@
     return Math.max(-100, Math.min(100, Math.round((coordinate - bounds[0]) / (bounds[1] - bounds[0]) * 200 - 100)));
   }
 
-  window.NeonatalVolume = { load, render, voxelAt, positionForStructures, structureNames: STRUCTURE_NAMES, tissueNames: TISSUE_NAMES, territories: TERRITORIES };
+  window.NeonatalVolume = { load, render, voxelAt, positionForStructures, structureNames: STRUCTURE_NAMES, tissueNames: TISSUE_NAMES, territories: TERRITORIES, venousTerritories: VENOUS_TERRITORIES };
 })();

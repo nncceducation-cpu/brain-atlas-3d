@@ -28,3 +28,9 @@ The anatomical orientation controls were informed by the public Neurotorium 3D B
 
 - Núñez C, Arca G, Agut T, Stephan-Otto C, García-Alix A. *Precise neonatal arterial ischemic stroke classification with a three-dimensional map of the arterial territories of the neonatal brain.* Pediatric Research. 2020;87:1231–1236. https://doi.org/10.1038/s41390-019-0724-x. The educational slice-territory topology is informed by this neonatal ATNB work; its original atlas files and figures are not redistributed here.
 - Liu CF, et al. *Digital 3D Brain MRI Arterial Territories Atlas.* Scientific Reports. 2023;13:2890. https://doi.org/10.1038/s41598-023-29381-5. Used to cross-check the major ACA, MCA, PCA, vertebrobasilar and deep-perforator organization.
+
+## Cerebral venous anatomy references
+
+- Chaiyamoon A, et al. *Cerebral circulation 1: anatomy.* BJA Education. 2021;21(11):390–395. https://doi.org/10.1016/j.bjae.2021.07.001. Used for the superficial/deep division and the courses of the Sylvian, Trolard, Labbé, internal cerebral, basal and Galenic pathways.
+- Chaigasame O, et al. *Neuroanatomy, Brain Veins.* StatPearls. National Center for Biotechnology Information. https://www.ncbi.nlm.nih.gov/books/NBK546605/. Used to cross-check named superficial veins, dural-sinus connections, deep venous convergence and documented normal variation.
+- Idiculla PS, et al. *Cerebral venous thrombosis: a spectrum of imaging findings.* Singapore Medical Journal. 2022;63(9):497–507. https://doi.org/10.11622/smedj.2021114. Used to cross-check MR-visible sinus and deep-vein relationships. No source figures are redistributed.

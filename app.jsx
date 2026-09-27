@@ -240,7 +240,8 @@ function App() {
     { on: false, value: 0, flip: false },
   ]);
   const [arterialMode, setArterialMode] = React.useState(false);
-  const arterialCortexRef = React.useRef(1);
+  const [venousMode, setVenousMode] = React.useState(false);
+  const vascularCortexRef = React.useRef(1);
   // VR (WebXR beta)
   const [vrSupported, setVrSupported] = React.useState(false);
   const [vrActive, setVrActive] = React.useState(false);
@@ -328,6 +329,11 @@ function App() {
     if (!s || !s.setSlice) return;
     slice.forEach((v, axis) => s.setSlice(axis, v.on, v.value));
   }, [slice, sceneReady]);
+
+  React.useEffect(() => {
+    const s = sceneRef.current;
+    if (s && s.setVenousOverlay) s.setVenousOverlay(venousMode);
+  }, [venousMode, sceneReady]);
 
   // ---- compose & push to scene ----
   const firstCompose = React.useRef(true);
@@ -423,6 +429,7 @@ function App() {
     setHemisphere('both'); setSearchSide('both'); setIsolatedIds(null); setSearch(''); setSelectedId(null); setFocusedId(null);
     setSlice([{ on: false, value: 0, flip: false }, { on: false, value: 0, flip: false }, { on: false, value: 0, flip: false }]);
     setArterialMode(false);
+    setVenousMode(false);
     setMode('explore'); setActiveSystem(null); setOpenLessonId(null); setPhase(null); setSysPlaying(false); setLessonPlaying(false);
     if (sceneRef.current) {
       sceneRef.current.clearHighlight(); sceneRef.current.setView('threequarter'); sceneRef.current.reset();
@@ -435,14 +442,28 @@ function App() {
     setArterialMode(current => {
       const next = !current;
       setActivePreset(null);
-      setLayerOn(layers => ({ ...layers, arteries: next }));
+      setLayerOn(layers => ({ ...layers, arteries: next, veins_sinuses: next ? false : layers.veins_sinuses }));
       if (next) {
-        arterialCortexRef.current = cortexOpacity;
+        if (!venousMode) vascularCortexRef.current = cortexOpacity;
+        setVenousMode(false);
         setCortexOpacity(.24);
-      } else {
-        setCortexOpacity(arterialCortexRef.current);
-      }
+      } else if (!venousMode) setCortexOpacity(vascularCortexRef.current);
       flash(next ? 'Cerebral arterial system and supply territories added' : 'Cerebral arterial system removed');
+      return next;
+    });
+  };
+
+  const toggleVenousMode = () => {
+    setVenousMode(current => {
+      const next = !current;
+      setActivePreset(null);
+      setLayerOn(layers => ({ ...layers, veins_sinuses: next, arteries: next ? false : layers.arteries }));
+      if (next) {
+        if (!arterialMode) vascularCortexRef.current = cortexOpacity;
+        setArterialMode(false);
+        setCortexOpacity(.20);
+      } else if (!arterialMode) setCortexOpacity(vascularCortexRef.current);
+      flash(next ? 'Cerebral venous system and drainage territories added' : 'Cerebral venous system removed');
       return next;
     });
   };
@@ -781,7 +802,7 @@ function App() {
       <div className="stage" />
       <canvas ref={canvasRef} className="three" />
       {slice.some(v => v.on) && (
-        <NeonatalSliceView slice={slice} layerOn={layerOn} arterialMode={arterialMode} />
+        <NeonatalSliceView slice={slice} layerOn={layerOn} arterialMode={arterialMode} venousMode={venousMode} />
       )}
 
       {/* corner toolbar: save poster · credits · shuffle palette · subsystem key */}
@@ -833,7 +854,8 @@ function App() {
 
       {!mobile && <SlicePanel value={slice} onChange={changeSlice}
         onView={selectAnatomicalView} layerOn={layerOn} onToggleLayer={toggleLayer}
-        arterialMode={arterialMode} onToggleArterialMode={toggleArterialMode} />}
+        arterialMode={arterialMode} onToggleArterialMode={toggleArterialMode}
+        venousMode={venousMode} onToggleVenousMode={toggleVenousMode} />}
 
       {/* SYSTEMS narration (free stepping) */}
       {activeSystem && !lesson && (
@@ -883,7 +905,7 @@ function App() {
   );
 }
 
-function NeonatalSliceView({ slice, layerOn, arterialMode }) {
+function NeonatalSliceView({ slice, layerOn, arterialMode, venousMode }) {
   const canvasRef = React.useRef(null);
   const displayRef = React.useRef(null);
   const atlasRef = React.useRef(null);
@@ -915,8 +937,9 @@ function NeonatalSliceView({ slice, layerOn, arterialMode }) {
         white_matter: !!layerOn.white_matter,
         ventricles: !!layerOn.ventricles,
         arterialTerritories: arterialMode,
+        venousTerritories: venousMode,
       });
-  }, [status, activeAxis, activeSlice.value, layerOn.cortex, layerOn.white_matter, layerOn.ventricles, arterialMode]);
+  }, [status, activeAxis, activeSlice.value, layerOn.cortex, layerOn.white_matter, layerOn.ventricles, arterialMode, venousMode]);
 
   const inspect = (event) => {
     if (!atlasRef.current || !displayRef.current) return;
@@ -939,10 +962,10 @@ function NeonatalSliceView({ slice, layerOn, arterialMode }) {
       <canvas ref={canvasRef} className="volume-slice-canvas" aria-label={`${planeNames[activeAxis]} neonatal MRI atlas section`} />
       <div className="volume-slice-status">
         <strong>{planeNames[activeAxis]} · 40-week neonatal atlas</strong>
-        <span>{status === 'loading' ? 'Loading volumetric MRI…' : status === 'error' ? error : `Position ${activeSlice.value}% · ${arterialMode ? 'neonatal arterial supply territories' : 'dHCP T2 + aligned segmentation'}`}</span>
+        <span>{status === 'loading' ? 'Loading volumetric MRI…' : status === 'error' ? error : `Position ${activeSlice.value}% · ${arterialMode ? 'neonatal arterial supply territories' : venousMode ? 'cerebral venous drainage territories' : 'dHCP T2 + aligned segmentation'}`}</span>
       </div>
       {hoverLabel && <div className="volume-slice-hover">{hoverLabel}</div>}
-      <div className="volume-slice-key" aria-label={arterialMode ? 'Arterial territory color key' : 'Segmentation color key'}>
+      <div className="volume-slice-key" aria-label={arterialMode ? 'Arterial territory color key' : venousMode ? 'Venous drainage territory color key' : 'Segmentation color key'}>
         {arterialMode ? <React.Fragment>
           <span><i style={{background:'#ef6f88'}} />ACA</span>
           <span><i style={{background:'#36a6c8'}} />MCA</span>
@@ -950,6 +973,12 @@ function NeonatalSliceView({ slice, layerOn, arterialMode }) {
           <span><i style={{background:'#edaa4c'}} />Lenticulostriate</span>
           <span><i style={{background:'#a875d2'}} />Anterior choroidal</span>
           <span><i style={{background:'#5967bd'}} />Vertebrobasilar</span>
+        </React.Fragment> : venousMode ? <React.Fragment>
+          <span><i style={{background:'#557fc2'}} />Superior sagittal</span>
+          <span><i style={{background:'#49a1b8'}} />Superficial middle</span>
+          <span><i style={{background:'#4da68f'}} />Labbé / transverse</span>
+          <span><i style={{background:'#8a68b1'}} />Deep Galenic</span>
+          <span><i style={{background:'#8b789f'}} />Posterior fossa</span>
         </React.Fragment> : <React.Fragment>
           <span><i style={{background:'#42beeb'}} />Ventricular CSF</span>
           <span><i style={{background:'#f4c95c'}} />Corpus callosum</span>
@@ -969,7 +998,7 @@ function NeonatalSliceView({ slice, layerOn, arterialMode }) {
   );
 }
 
-function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer, arterialMode, onToggleArterialMode }) {
+function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer, arterialMode, onToggleArterialMode, venousMode, onToggleVenousMode }) {
   const names = ['Sagittal', 'Axial', 'Coronal'];
   const directions = ['Right ↔ Left', 'Inferior ↔ Superior', 'Posterior ↔ Anterior'];
   const update = (i, patch) => onChange(value.map((v, j) => {
@@ -984,7 +1013,7 @@ function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer, arterialM
         <div>
           <div className="eyebrow-light" style={{ fontSize: 10, fontWeight: 750, letterSpacing: '.1em' }}>ANATOMICAL SECTION</div>
           <div style={{ fontSize: 8.5, color: 'var(--on-stage-soft)', opacity: .78, marginTop: 2 }}>
-            {arterialMode ? 'Neonatal arterial supply territories · aligned to dHCP' : 'Real 40-week T2 MRI · aligned dHCP labels'}
+            {arterialMode ? 'Neonatal arterial supply territories · aligned to dHCP' : venousMode ? 'Cerebral venous drainage territories · aligned to dHCP' : 'Real 40-week T2 MRI · aligned dHCP labels'}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 4 }}>
@@ -1033,6 +1062,17 @@ function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer, arterialM
       </button>
       {arterialMode && <div style={{ marginTop: 5, color: 'var(--on-stage-soft)', fontSize: 8.5, lineHeight: 1.35 }}>
         Sections show educational neonatal supply territories; individual borders and watershed zones vary.
+      </div>}
+      <button onClick={onToggleVenousMode} aria-pressed={venousMode}
+        title={`${venousMode ? 'Remove' : 'Add'} superficial and deep cerebral veins and show drainage territories`}
+        style={{ width: '100%', marginTop: 6, padding: '8px 10px', borderRadius: 9,
+          border: `1px solid ${venousMode ? '#557fc2' : 'var(--glass-edge)'}`,
+          background: venousMode ? 'rgba(85,127,194,.17)' : 'rgba(255,255,255,.06)',
+          color: 'var(--on-stage)', fontSize: 10.5, fontWeight: 750, cursor: 'pointer' }}>
+        {venousMode ? '− Remove cerebral venous system' : '+ Add cerebral venous system'}
+      </button>
+      {venousMode && <div style={{ marginTop: 5, color: 'var(--on-stage-soft)', fontSize: 8.5, lineHeight: 1.35 }}>
+        Sections show educational drainage regions; cortical veins and sinus dominance vary normally.
       </div>}
       {active && <button onClick={() => onChange(value.map(v => ({ ...v, on: false })))}
         style={{ marginTop: 5, border: 0, background: 'transparent', color: 'var(--on-stage-soft)', fontSize: 11, cursor: 'pointer' }}>Clear slices</button>}

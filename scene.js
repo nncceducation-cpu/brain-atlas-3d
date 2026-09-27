@@ -102,6 +102,42 @@
     const root = new T.Group(); root.rotation.y = -0.25; scene.add(root);
     const model = new T.Group(); root.add(model);   // holds the centered/scaled gltf
 
+    // The source mesh contains the major dural sinuses but not the named
+    // superficial and deep cerebral veins. Add an educational venous network
+    // in the same specimen coordinate system and connect it to those sinuses.
+    const venousOverlay = new T.Group();
+    venousOverlay.visible = false;
+    // Root-space coordinates are deliberately independent of the GLB's source
+    // units; scale them to the term-newborn cerebral envelope used on stage.
+    venousOverlay.scale.set(.67, .52, .67);
+    venousOverlay.position.y = -.08;
+    root.add(venousOverlay);
+    function venousTube(points, radius, color) {
+      const curve = new T.CatmullRomCurve3(points.map(p => new T.Vector3(p[0], p[1], p[2])));
+      const geometry = new T.TubeGeometry(curve, Math.max(12, points.length * 8), radius, 7, false);
+      const material = new T.MeshStandardMaterial({ color, emissive: new T.Color(color).multiplyScalar(.28),
+        roughness:.42, metalness:0, transparent:true, opacity:.94 });
+      const mesh = new T.Mesh(geometry, material); mesh.renderOrder = 12; venousOverlay.add(mesh); return mesh;
+    }
+    // Superior sagittal receiving channel and bilateral superior cortical veins.
+    venousTube([[0,1.46,1.13],[0,1.58,.55],[0,1.61,-.15],[0,1.46,-.88],[0,1.12,-1.28]], .038, '#436bb2');
+    [-.92,-.52,-.12,.30,.68].forEach(z => {
+      venousTube([[-1.34,.72,z+.10],[-.90,1.15,z],[-.38,1.48,z],[0,1.55,z-.03]], .018, '#6f9bd5');
+      venousTube([[1.34,.72,z+.10],[.90,1.15,z],[.38,1.48,z],[0,1.55,z-.03]], .018, '#6f9bd5');
+    });
+    // Superficial middle cerebral (Sylvian) veins, Trolard and Labbe.
+    [-1,1].forEach(side => {
+      venousTube([[side*1.42,.12,.92],[side*1.48,.18,.42],[side*1.43,.16,-.18]], .026, '#5485c3');
+      venousTube([[side*1.44,.16,.06],[side*1.20,.60,-.12],[side*.78,1.15,-.28],[side*.22,1.52,-.36]], .023, '#6997cf');
+      venousTube([[side*1.44,.12,-.08],[side*1.34,-.18,-.54],[side*.96,-.54,-.92],[side*.58,-.70,-1.18]], .024, '#5278b2');
+    });
+    // Paired internal cerebral veins, basal veins of Rosenthal and great vein of Galen.
+    [-1,1].forEach(side => {
+      venousTube([[side*.18,.18,.45],[side*.16,.14,.02],[side*.13,.08,-.54],[0,.02,-.78]], .022, '#735da8');
+      venousTube([[side*.72,-.28,.55],[side*.64,-.20,.10],[side*.44,-.15,-.42],[0,.02,-.78]], .021, '#806ab5');
+    });
+    venousTube([[0,.02,-.78],[0,.12,-.98],[0,.30,-1.12]], .032, '#674f9a');
+
     // logical category registry (we never reparent gltf meshes - keep transforms)
     const cats = {};                       // cat -> { want, targetOpacity, meshes[] }
     function C(cat) { if (!cats[cat]) cats[cat] = { want: true, targetOpacity: 1, meshes: [] }; return cats[cat]; }
@@ -264,6 +300,7 @@
       autoRot = false;
       idleTimer = 0;
     }
+    function setVenousOverlay(visible) { venousOverlay.visible = !!visible; }
     // keyboard modifier toggles pan even mid-drag
     window.addEventListener('keydown', (e) => { if ((e.key === 'Meta' || e.key === 'Control') && dragging) panning = true; });
     window.addEventListener('keyup', (e) => { if (e.key === 'Meta' || e.key === 'Control') panning = false; });
@@ -1167,7 +1204,7 @@
       setLayer, setLayers, setHemisphere, focusCategory, focusNode, setView,
       selectNode, clearSelect, reset, frameSphere, snap, isolate, setSubset, zoom,
       setHighlight, clearHighlight, frameNodes,
-      setAutoRotate, setExposure, setBackground, setPalette, setSlice, slicePositionForNode, slicePositionForNodes, capturePoster, vr, setVRInfo, setVRControls, setVRNarration,
+      setAutoRotate, setExposure, setBackground, setPalette, setSlice, setVenousOverlay, slicePositionForNode, slicePositionForNodes, capturePoster, vr, setVRInfo, setVRControls, setVRNarration,
       dispose() { try { const s = renderer.xr.getSession(); if (s) s.end(); } catch (e) {} renderer.setAnimationLoop(null); ro.disconnect(); renderer.dispose(); },
     };
   }
