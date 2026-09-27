@@ -107,6 +107,7 @@
     // preserves the irregular calibre, branching and asymmetry of real veins.
     const venousOverlay = new T.Group();
     venousOverlay.visible = false;
+    let venousOverlayActive = false;
     root.add(venousOverlay);
     const venographyLoader = new T.STLLoader();
     venographyLoader.load('./models/cerebral-venography.stl', geometry => {
@@ -289,7 +290,19 @@
       autoRot = false;
       idleTimer = 0;
     }
-    function setVenousOverlay(visible) { venousOverlay.visible = !!visible; }
+    function setVenousOverlay(visible) {
+      venousOverlayActive = !!visible;
+      venousOverlay.visible = venousOverlayActive;
+      // The source GLB contains a second, differently registered set of dural
+      // sinuses. Never draw it together with the image-derived venogram.
+      // Keeping suppression here (rather than changing React layer state)
+      // preserves every non-vascular feature and restores the legacy layer
+      // exactly when venous mode is turned off.
+      if (loaded) snap();
+    }
+    function legacyVenousSuppressed(m) {
+      return venousOverlayActive && m && m.userData.cat === 'veins_sinuses';
+    }
     // keyboard modifier toggles pan even mid-drag
     window.addEventListener('keydown', (e) => { if ((e.key === 'Meta' || e.key === 'Control') && dragging) panning = true; });
     window.addEventListener('keyup', (e) => { if (e.key === 'Meta' || e.key === 'Control') panning = false; });
@@ -427,7 +440,7 @@
     function snap() {
       allMeshes.forEach(m => {
         const c = cats[m.userData.cat];
-        const want = c && c.want && !m.userData.hemiHidden && !m.userData.isoHidden && !m.userData.subsetHidden;
+        const want = c && c.want && !legacyVenousSuppressed(m) && !m.userData.hemiHidden && !m.userData.isoHidden && !m.userData.subsetHidden;
         const cap = m.userData.maxOpacity != null ? m.userData.maxOpacity : 1;
         m.material.opacity = want ? Math.min(cap, c.targetOpacity) : 0;
         // only solid meshes write depth - a translucent ghost (e.g. faded cortex)
@@ -906,12 +919,13 @@
           const ud = m.userData;
           const hemiOk = !ud.hemiHidden;
           const cap = ud.maxOpacity != null ? ud.maxOpacity : 1;
-          const isActive = hemiOk && hiActive.has(ud.nodeId);
-          const isSeen = hemiOk && !isActive && hiSeen.has(ud.nodeId);
+          const suppressed = legacyVenousSuppressed(m);
+          const isActive = !suppressed && hemiOk && hiActive.has(ud.nodeId);
+          const isSeen = !suppressed && hemiOk && !isActive && hiSeen.has(ud.nodeId);
           let tgt;
           if (isActive) tgt = Math.min(cap, 1);
           else if (isSeen) tgt = Math.min(cap, 0.62);
-          else if (hemiOk && GHOST_CATS.has(ud.cat)) tgt = 0.05;   // faint context
+          else if (!suppressed && hemiOk && GHOST_CATS.has(ud.cat)) tgt = 0.05;   // faint context
           else tgt = 0;
           m.material.opacity += (tgt - m.material.opacity) * (isActive ? 1 : fade);
           m.material.depthWrite = m.material.opacity >= 0.98;
@@ -933,9 +947,9 @@
         const pulse = 0.5 + 0.5 * Math.sin(now * 0.005);   // gentle breathing glow for VR feedback
         allMeshes.forEach(m => {
           const c = cats[m.userData.cat];
-          const want = c && c.want && !m.userData.hemiHidden && !m.userData.isoHidden && !m.userData.subsetHidden;
+          const want = c && c.want && !legacyVenousSuppressed(m) && !m.userData.hemiHidden && !m.userData.isoHidden && !m.userData.subsetHidden;
           const cap = m.userData.maxOpacity != null ? m.userData.maxOpacity : 1;
-          const isSel = selectedIds.has(m);
+          const isSel = !legacyVenousSuppressed(m) && selectedIds.has(m);
           // a selected structure is forced fully opaque (even under a faded cortex) and glows
           const tgt = isSel ? 1 : (want ? Math.min(cap, c.targetOpacity) : 0);
           m.material.opacity += (tgt - m.material.opacity) * (isSel ? 1 : fade);
