@@ -65,12 +65,12 @@
     const clipPlanes = Array.from({ length: 6 }, () => new T.Plane(new T.Vector3(1, 0, 0), 1e5));
     const clipBounds = [new T.Vector2(-1.7, 1.7), new T.Vector2(-1.7, 1.7), new T.Vector2(-1.7, 1.7)];
     const sliceState = Array.from({ length: 3 }, () => ({ enabled: false, value: 0 }));
-    // Opaque backing turns the retained anatomical slab into a single clean
-    // section film. It blocks every structure behind the selected plane while
-    // leaving the actual meshes, picking and manual camera controls untouched.
+    // A brain-shaped tissue backing fills gaps caused by the source's hollow
+    // surface meshes. It has no rectangular frame and stays behind the true
+    // structures, so ventricles and deep nuclei remain visible in front.
     const sectionFilm = new T.Mesh(
-      new T.PlaneGeometry(1, 1),
-      new T.MeshBasicMaterial({ color: 0x252b32, side: T.DoubleSide, depthWrite: true, depthTest: true })
+      new T.CircleGeometry(0.5, 96),
+      new T.MeshBasicMaterial({ color: 0xaeb5bc, side: T.DoubleSide, depthWrite: true, depthTest: true })
     );
     sectionFilm.visible = false;
     sectionFilm.renderOrder = -10;
@@ -941,26 +941,29 @@
       const lo = clipBounds[a].x, hi = clipBounds[a].y;
       const t = (Math.max(-100, Math.min(100, Number(sliceState[a].value) || 0)) + 100) / 200;
       const center = T.MathUtils.lerp(lo, hi, t);
-      const half = Math.max((hi - lo) * 0.055, 0.07);
+      const half = Math.max((hi - lo) * 0.022, 0.035);
       const xSize = clipBounds[0].y - clipBounds[0].x;
       const ySize = clipBounds[1].y - clipBounds[1].x;
       const zSize = clipBounds[2].y - clipBounds[2].x;
+      const xMid = (clipBounds[0].x + clipBounds[0].y) / 2;
+      const yMid = (clipBounds[1].x + clipBounds[1].y) / 2;
+      const zMid = (clipBounds[2].x + clipBounds[2].y) / 2;
       sectionFilm.rotation.set(0, 0, 0);
-      sectionFilm.position.set(0, 0, 0);
+      sectionFilm.position.set(xMid, yMid, zMid);
       if (a === 0) {
         // Sagittal viewer is on +X; place film at the far face of the slab.
         sectionFilm.rotation.y = Math.PI / 2;
         sectionFilm.position.x = center - half - 0.004;
-        sectionFilm.scale.set(zSize * 1.08, ySize * 1.08, 1);
+        sectionFilm.scale.set(zSize * 0.88, ySize * 0.84, 1);
       } else if (a === 1) {
         // Axial viewer is superior (+Y).
         sectionFilm.rotation.x = -Math.PI / 2;
         sectionFilm.position.y = center - half - 0.004;
-        sectionFilm.scale.set(xSize * 1.08, zSize * 1.08, 1);
+        sectionFilm.scale.set(xSize * 0.88, zSize * 0.84, 1);
       } else {
         // Coronal viewer is anterior-facing from -Z.
         sectionFilm.position.z = center + half + 0.004;
-        sectionFilm.scale.set(xSize * 1.08, ySize * 1.08, 1);
+        sectionFilm.scale.set(xSize * 0.88, ySize * 0.84, 1);
       }
       sectionFilm.visible = true;
     }
@@ -974,7 +977,7 @@
       // A narrow atlas-space slab approximates one anatomical section while
       // retaining enough thickness for surface-only source geometry to remain
       // legible. It never follows the camera.
-      const half = Math.max((hi - lo) * 0.055, 0.07);
+      const half = Math.max((hi - lo) * 0.022, 0.035);
       const lowPlane = clipPlanes[a * 2], highPlane = clipPlanes[a * 2 + 1];
       lowPlane.normal.set(a === 0 ? 1 : 0, a === 1 ? 1 : 0, a === 2 ? 1 : 0);
       highPlane.normal.set(a === 0 ? -1 : 0, a === 1 ? -1 : 0, a === 2 ? -1 : 0);
