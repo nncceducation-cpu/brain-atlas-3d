@@ -128,8 +128,13 @@
       // Fit the outer cortical collectors to the pial envelope (not the inner
       // parenchymal volume). This keeps superficial cerebral veins on the
       // surface while the Galenic/internal system remains appropriately deep.
-      mesh.scale.set(.0122, .0105, .0096);
-      mesh.position.set(0, -.03, -.02);
+      // Axis-specific surface registration. The source venogram is relatively
+      // narrower and shorter front-to-back than the rounded term-newborn brain;
+      // a uniform scale left the sagittal/transverse sinuses inside the cortex.
+      // Expand LR and especially AP while changing SI only slightly, so deep
+      // veins are not artificially lifted toward the convexity.
+      mesh.scale.set(.0132, .0128, .0103);
+      mesh.position.set(0, -.015, -.01);
       mesh.renderOrder = 12;
       mesh.userData = { cat: 'veins_sinuses', source: 'MRI venography — Nevit Dilmen, CC BY-SA 3.0' };
       venousOverlay.add(mesh);
