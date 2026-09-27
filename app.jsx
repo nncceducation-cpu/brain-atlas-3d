@@ -239,6 +239,8 @@ function App() {
     { on: false, value: 0, flip: false },
     { on: false, value: 0, flip: false },
   ]);
+  const [arterialMode, setArterialMode] = React.useState(false);
+  const arterialCortexRef = React.useRef(1);
   // VR (WebXR beta)
   const [vrSupported, setVrSupported] = React.useState(false);
   const [vrActive, setVrActive] = React.useState(false);
@@ -420,12 +422,29 @@ function App() {
     setActivePreset('whole'); applyPreset(PRESETS[0], false);
     setHemisphere('both'); setSearchSide('both'); setIsolatedIds(null); setSearch(''); setSelectedId(null); setFocusedId(null);
     setSlice([{ on: false, value: 0, flip: false }, { on: false, value: 0, flip: false }, { on: false, value: 0, flip: false }]);
+    setArterialMode(false);
     setMode('explore'); setActiveSystem(null); setOpenLessonId(null); setPhase(null); setSysPlaying(false); setLessonPlaying(false);
     if (sceneRef.current) {
       sceneRef.current.clearHighlight(); sceneRef.current.setView('threequarter'); sceneRef.current.reset();
       sceneRef.current.setAutoRotate(t.autorotate);
     }
     flash('Global brain view restored');
+  };
+
+  const toggleArterialMode = () => {
+    setArterialMode(current => {
+      const next = !current;
+      setActivePreset(null);
+      setLayerOn(layers => ({ ...layers, arteries: next }));
+      if (next) {
+        arterialCortexRef.current = cortexOpacity;
+        setCortexOpacity(.24);
+      } else {
+        setCortexOpacity(arterialCortexRef.current);
+      }
+      flash(next ? 'Cerebral arterial system and supply territories added' : 'Cerebral arterial system removed');
+      return next;
+    });
   };
 
   const applyPreset = (p, doFocus = true) => {
@@ -762,7 +781,7 @@ function App() {
       <div className="stage" />
       <canvas ref={canvasRef} className="three" />
       {slice.some(v => v.on) && (
-        <NeonatalSliceView slice={slice} layerOn={layerOn} />
+        <NeonatalSliceView slice={slice} layerOn={layerOn} arterialMode={arterialMode} />
       )}
 
       {/* corner toolbar: save poster · credits · shuffle palette · subsystem key */}
@@ -813,7 +832,8 @@ function App() {
         isolated={!!isolatedIds} focused={selNode && focusedId === selNode.id} onClearIsolate={clearIsolate} mobile={mobile} />
 
       {!mobile && <SlicePanel value={slice} onChange={changeSlice}
-        onView={selectAnatomicalView} layerOn={layerOn} onToggleLayer={toggleLayer} />}
+        onView={selectAnatomicalView} layerOn={layerOn} onToggleLayer={toggleLayer}
+        arterialMode={arterialMode} onToggleArterialMode={toggleArterialMode} />}
 
       {/* SYSTEMS narration (free stepping) */}
       {activeSystem && !lesson && (
@@ -863,7 +883,7 @@ function App() {
   );
 }
 
-function NeonatalSliceView({ slice, layerOn }) {
+function NeonatalSliceView({ slice, layerOn, arterialMode }) {
   const canvasRef = React.useRef(null);
   const displayRef = React.useRef(null);
   const atlasRef = React.useRef(null);
@@ -894,8 +914,9 @@ function NeonatalSliceView({ slice, layerOn }) {
         cortex: !!layerOn.cortex,
         white_matter: !!layerOn.white_matter,
         ventricles: !!layerOn.ventricles,
+        arterialTerritories: arterialMode,
       });
-  }, [status, activeAxis, activeSlice.value, layerOn.cortex, layerOn.white_matter, layerOn.ventricles]);
+  }, [status, activeAxis, activeSlice.value, layerOn.cortex, layerOn.white_matter, layerOn.ventricles, arterialMode]);
 
   const inspect = (event) => {
     if (!atlasRef.current || !displayRef.current) return;
@@ -918,16 +939,25 @@ function NeonatalSliceView({ slice, layerOn }) {
       <canvas ref={canvasRef} className="volume-slice-canvas" aria-label={`${planeNames[activeAxis]} neonatal MRI atlas section`} />
       <div className="volume-slice-status">
         <strong>{planeNames[activeAxis]} · 40-week neonatal atlas</strong>
-        <span>{status === 'loading' ? 'Loading volumetric MRI…' : status === 'error' ? error : `Position ${activeSlice.value}% · dHCP T2 + aligned segmentation`}</span>
+        <span>{status === 'loading' ? 'Loading volumetric MRI…' : status === 'error' ? error : `Position ${activeSlice.value}% · ${arterialMode ? 'neonatal arterial supply territories' : 'dHCP T2 + aligned segmentation'}`}</span>
       </div>
       {hoverLabel && <div className="volume-slice-hover">{hoverLabel}</div>}
-      <div className="volume-slice-key" aria-label="Segmentation color key">
-        <span><i style={{background:'#42beeb'}} />Ventricular CSF</span>
-        <span><i style={{background:'#f4c95c'}} />Corpus callosum</span>
-        <span><i style={{background:'#9779e0'}} />Thalamus</span>
-        <span><i style={{background:'#ef706c'}} />Caudate</span>
-        <span><i style={{background:'#4cb5a6'}} />Lentiform</span>
-        <span><i style={{background:'#5bb279'}} />Hippocampus</span>
+      <div className="volume-slice-key" aria-label={arterialMode ? 'Arterial territory color key' : 'Segmentation color key'}>
+        {arterialMode ? <React.Fragment>
+          <span><i style={{background:'#ef6f88'}} />ACA</span>
+          <span><i style={{background:'#36a6c8'}} />MCA</span>
+          <span><i style={{background:'#89bd57'}} />PCA</span>
+          <span><i style={{background:'#edaa4c'}} />Lenticulostriate</span>
+          <span><i style={{background:'#a875d2'}} />Anterior choroidal</span>
+          <span><i style={{background:'#5967bd'}} />Vertebrobasilar</span>
+        </React.Fragment> : <React.Fragment>
+          <span><i style={{background:'#42beeb'}} />Ventricular CSF</span>
+          <span><i style={{background:'#f4c95c'}} />Corpus callosum</span>
+          <span><i style={{background:'#9779e0'}} />Thalamus</span>
+          <span><i style={{background:'#ef706c'}} />Caudate</span>
+          <span><i style={{background:'#4cb5a6'}} />Lentiform</span>
+          <span><i style={{background:'#5bb279'}} />Hippocampus</span>
+        </React.Fragment>}
       </div>
       <div className="volume-slice-orientation" aria-hidden="true">
         <span className="top">{activeAxis === 1 ? 'A' : 'S'}</span>
@@ -939,7 +969,7 @@ function NeonatalSliceView({ slice, layerOn }) {
   );
 }
 
-function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer }) {
+function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer, arterialMode, onToggleArterialMode }) {
   const names = ['Sagittal', 'Axial', 'Coronal'];
   const directions = ['Right ↔ Left', 'Inferior ↔ Superior', 'Posterior ↔ Anterior'];
   const update = (i, patch) => onChange(value.map((v, j) => {
@@ -953,7 +983,9 @@ function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer }) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 7 }}>
         <div>
           <div className="eyebrow-light" style={{ fontSize: 10, fontWeight: 750, letterSpacing: '.1em' }}>ANATOMICAL SECTION</div>
-          <div style={{ fontSize: 8.5, color: 'var(--on-stage-soft)', opacity: .78, marginTop: 2 }}>Real 40-week T2 MRI · aligned dHCP labels</div>
+          <div style={{ fontSize: 8.5, color: 'var(--on-stage-soft)', opacity: .78, marginTop: 2 }}>
+            {arterialMode ? 'Neonatal arterial supply territories · aligned to dHCP' : 'Real 40-week T2 MRI · aligned dHCP labels'}
+          </div>
         </div>
         <div style={{ display: 'flex', gap: 4 }}>
           {['sagittal', 'coronal', 'axial', 'three-quarter'].map(v => (
@@ -991,6 +1023,17 @@ function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer }) {
           </button>;
         })}
       </div>
+      <button onClick={onToggleArterialMode} aria-pressed={arterialMode}
+        title={`${arterialMode ? 'Remove' : 'Add'} cerebral arteries and show their neonatal supply territories`}
+        style={{ width: '100%', marginTop: 7, padding: '8px 10px', borderRadius: 9,
+          border: `1px solid ${arterialMode ? '#d84d64' : 'var(--glass-edge)'}`,
+          background: arterialMode ? 'rgba(216,77,100,.16)' : 'rgba(255,255,255,.06)',
+          color: 'var(--on-stage)', fontSize: 10.5, fontWeight: 750, cursor: 'pointer' }}>
+        {arterialMode ? '− Remove cerebral arterial system' : '+ Add cerebral arterial system'}
+      </button>
+      {arterialMode && <div style={{ marginTop: 5, color: 'var(--on-stage-soft)', fontSize: 8.5, lineHeight: 1.35 }}>
+        Sections show educational neonatal supply territories; individual borders and watershed zones vary.
+      </div>}
       {active && <button onClick={() => onChange(value.map(v => ({ ...v, on: false })))}
         style={{ marginTop: 5, border: 0, background: 'transparent', color: 'var(--on-stage-soft)', fontSize: 11, cursor: 'pointer' }}>Clear slices</button>}
     </div>

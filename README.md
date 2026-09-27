@@ -22,12 +22,15 @@ The NNCC interface uses an original dark clinical-workspace design with a right-
 - Full-field sagittal, axial, and coronal neonatal MRI sections with brain-bounded travel
 - Aligned labels for ventricles, corpus callosum, hippocampi, amygdalae, caudate, lentiform nuclei, thalami, subthalamic nuclei, brainstem, and cerebellum
 - Independent cortex, white-matter, and ventricular display controls in slice mode
+- One-click cerebral arterial mode with the named 3D arterial tree and neonatal ACA, MCA, PCA, deep-perforator, and posterior-circulation supply territories in every MRI plane
 - One-click sagittal, coronal, axial, and three-quarter anatomical orientations
 - Focus, isolate, presets, guided systems, and lessons
 - Shareable views and high-resolution poster export
 - Keyboard navigation: `1` Explore, `2` Systems, `3` Learn, `/` search, `R` reset
 
 The anatomical-section controls render the CC BY 4.0 dHCP 40-week T2 atlas and its co-registered hard segmentations directly. The slider is limited to the non-background brain bounds, so both hemispheres are sectioned by one true orthogonal voxel plane and no unsliced surface geometry is visible behind it. Hovering a slice identifies labelled tissue or a major segmented structure.
+
+The optional arterial mode preserves the MRI beneath a translucent educational supply-territory overlay. Its neonatal topology is informed by the published ATNB map, with major territories cross-checked against the Digital 3D Brain MRI Arterial Territories Atlas. Because arterial borders and watershed zones vary between infants, the territory overlay is for teaching rather than patient-level lesion localization.
 
 ## Accuracy and intended use
 

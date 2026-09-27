@@ -14,6 +14,17 @@
     86:'Right thalamus',87:'Left thalamus'
   };
   const TISSUE_NAMES = {1:'CSF',2:'Cortical gray matter',3:'White matter',5:'Ventricular CSF',6:'Cerebellum',7:'Deep gray matter',8:'Brainstem',9:'Hippocampus / amygdala'};
+  const TERRITORIES = {
+    aca: { label:'Anterior cerebral artery (ACA) territory', color:[239,111,136,.58] },
+    mca: { label:'Middle cerebral artery (MCA) territory', color:[54,166,200,.58] },
+    pca: { label:'Posterior cerebral artery (PCA) territory', color:[137,189,87,.60] },
+    lsa: { label:'Lenticulostriate artery territory', color:[237,170,76,.68] },
+    acha:{ label:'Anterior choroidal artery territory', color:[168,117,210,.66] },
+    sca: { label:'Superior cerebellar artery territory', color:[236,190,72,.60] },
+    aica:{ label:'Anterior inferior cerebellar artery territory', color:[231,126,77,.62] },
+    pica:{ label:'Posterior inferior cerebellar artery territory', color:[194,85,151,.62] },
+    vb:  { label:'Vertebrobasilar perforator territory', color:[89,103,189,.64] }
+  };
 
   async function inflate(path) {
     const response = await fetch(BASE + path);
@@ -68,6 +79,33 @@
     return null;
   }
 
+  // Educational neonatal territory model evaluated inside the aligned dHCP
+  // parenchymal mask, keeping every plane spatially consistent. Its topology
+  // follows the neonatal ATNB map (Nunez et al., Pediatric Research 2020).
+  function territoryFor(x, y, z, structure, tissue, meta) {
+    if (!tissue || tissue === 1 || tissue === 4 || tissue === 5 || structure === 49 || structure === 50) return null;
+    const b = meta.brainBounds;
+    const nx = (x - b[0][0]) / (b[0][1] - b[0][0]);
+    const ap = (y - b[1][0]) / (b[1][1] - b[1][0]);
+    const si = (z - b[2][0]) / (b[2][1] - b[2][0]);
+    const medial = Math.abs(nx - .5) * 2;
+
+    if (tissue === 8 || structure === 19) return 'vb';
+    if (tissue === 6 || structure === 17 || structure === 18) {
+      if (si > .30) return 'sca';
+      return ap > .48 ? 'aica' : 'pica';
+    }
+    if (structure === 40 || structure === 41 || structure === 46 || structure === 47) return 'lsa';
+    if (structure === 3 || structure === 4) return 'acha';
+    if (structure === 42 || structure === 43 || structure === 44 || structure === 45 || structure === 86 || structure === 87) return 'pca';
+    if (structure === 1 || structure === 2) return ap < .53 ? 'pca' : 'acha';
+    if (structure === 48) return 'aca';
+    if (ap < (.29 + .08 * (1 - medial)) || (si < .43 && ap < .53 && medial < .66)) return 'pca';
+    const acaWidth = .22 + .10 * Math.max(0, si - .45);
+    if (medial < acaWidth && (si > .38 || ap > .52)) return 'aca';
+    return 'mca';
+  }
+
   function render(target, atlas, axis, percent, visible) {
     const { meta, intensity, tissues, structures } = atlas;
     const shape = meta.shape;
@@ -107,7 +145,8 @@
         let r = outside || removed ? 219 : value;
         let g = outside || removed ? 228 : value;
         let b = outside || removed ? 236 : value;
-        const overlay = outside || removed ? null : colorFor(structure, tissue);
+        const territory = visible.arterialTerritories && !outside && !removed ? territoryFor(x,y,z,structure,tissue,meta) : null;
+        const overlay = outside || removed ? null : (territory ? TERRITORIES[territory].color : (visible.arterialTerritories ? null : colorFor(structure, tissue)));
         if (overlay) {
           const a = overlay[3];
           r = Math.round(value * (1-a) + overlay[0] * a);
@@ -118,7 +157,7 @@
       }
     }
     ctx.putImageData(image, 0, 0);
-    return { axis, sliceIndex, geom };
+    return { axis, sliceIndex, geom, arterialTerritories: !!visible.arterialTerritories };
   }
 
   function voxelAt(display, u, v, atlas) {
@@ -129,11 +168,12 @@
     const idx = index3(voxel[0], voxel[1], voxel[2], atlas.meta.shape);
     const structure = atlas.structures[idx], tissue = atlas.tissues[idx];
     const atlasLabel = atlas.meta.structureLabels && atlas.meta.structureLabels[String(structure)];
-    let label = STRUCTURE_NAMES[structure] || atlasLabel || TISSUE_NAMES[tissue] || null;
+    const territory = display.arterialTerritories ? territoryFor(voxel[0],voxel[1],voxel[2],structure,tissue,atlas.meta) : null;
+    let label = territory ? TERRITORIES[territory].label : (STRUCTURE_NAMES[structure] || atlasLabel || TISSUE_NAMES[tissue] || null);
     // Tissue probability edges can extend beyond their hard structural label.
     // Name those deep-grey voxels by the nearest segmented nucleus rather than
     // exposing the vague tissue-class fallback to learners.
-    if (tissue === 7 && !STRUCTURE_NAMES[structure]) {
+    if (!display.arterialTerritories && tissue === 7 && !STRUCTURE_NAMES[structure]) {
       const candidates = [40,41,42,43,44,45,46,47,86,87];
       let nearest = null, best = Infinity;
       candidates.forEach(id => {
@@ -158,5 +198,5 @@
     return Math.max(-100, Math.min(100, Math.round((coordinate - bounds[0]) / (bounds[1] - bounds[0]) * 200 - 100)));
   }
 
-  window.NeonatalVolume = { load, render, voxelAt, positionForStructures, structureNames: STRUCTURE_NAMES, tissueNames: TISSUE_NAMES };
+  window.NeonatalVolume = { load, render, voxelAt, positionForStructures, structureNames: STRUCTURE_NAMES, tissueNames: TISSUE_NAMES, territories: TERRITORIES };
 })();

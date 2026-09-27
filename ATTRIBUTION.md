@@ -23,3 +23,8 @@ The orthogonal section viewer uses aligned atlas voxels rather than reconstructe
 ## Interaction references
 
 The anatomical orientation controls were informed by the public Neurotorium 3D Brain Atlas interface. Keyboard-accessible learning-mode navigation was informed by the public NeuroGlance interface. These are UX references only; this repository does not redistribute their models, imagery, text, or source code.
+
+## Cerebral arterial territory references
+
+- Núñez C, Arca G, Agut T, Stephan-Otto C, García-Alix A. *Precise neonatal arterial ischemic stroke classification with a three-dimensional map of the arterial territories of the neonatal brain.* Pediatric Research. 2020;87:1231–1236. https://doi.org/10.1038/s41390-019-0724-x. The educational slice-territory topology is informed by this neonatal ATNB work; its original atlas files and figures are not redistributed here.
+- Liu CF, et al. *Digital 3D Brain MRI Arterial Territories Atlas.* Scientific Reports. 2023;13:2890. https://doi.org/10.1038/s41598-023-29381-5. Used to cross-check the major ACA, MCA, PCA, vertebrobasilar and deep-perforator organization.
