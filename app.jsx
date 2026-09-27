@@ -844,7 +844,7 @@ function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer }) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 7 }}>
         <div>
           <div className="eyebrow-light" style={{ fontSize: 10, fontWeight: 750, letterSpacing: '.1em' }}>ANATOMICAL SECTION</div>
-          <div style={{ fontSize: 8.5, color: 'var(--on-stage-soft)', opacity: .78, marginTop: 2 }}>Fixed atlas plane · camera-independent</div>
+          <div style={{ fontSize: 8.5, color: 'var(--on-stage-soft)', opacity: .78, marginTop: 2 }}>Opaque section film · fixed atlas plane</div>
         </div>
         <div style={{ display: 'flex', gap: 4 }}>
           {['sagittal', 'coronal', 'axial', 'three-quarter'].map(v => (
