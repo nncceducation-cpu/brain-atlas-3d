@@ -1195,7 +1195,7 @@ function Legend({ groups, layerOn, onPoster, posterBusy, onCopyLink, onZoom, mob
 
   const spinPill = autorotate ? { ...pill, borderColor: 'var(--accent)', color: 'var(--accent)' } : pill;
   return (
-    <div style={{ position: 'absolute', right: 16, bottom: 16, zIndex: 12, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+    <div style={{ position: 'absolute', left: 16, top: 16, zIndex: 24, display: 'flex', flexDirection: 'column-reverse', alignItems: 'flex-start', gap: 8 }}>
       {cred && about}
       {share && !mobile && (
         <div className="glass pop" style={{ padding: 8, width: 232 }}>
