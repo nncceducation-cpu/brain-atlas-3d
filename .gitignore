@@ -1,2 +1,5 @@
 .atlas-source/
 __pycache__/
+node_modules/
+dist/
+.pnpm-store/

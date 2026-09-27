@@ -1,0 +1,63 @@
+{
+  "name": "newborn-brain-3d",
+  "version": "1.0.0",
+  "description": "Interactive term-equivalent newborn neuroanatomy atlas for web and offline desktop use.",
+  "main": "electron/main.cjs",
+  "author": "NNCC Education",
+  "license": "CC-BY-SA-4.0",
+  "private": true,
+  "scripts": {
+    "vendor": "node scripts/vendor-runtime.cjs",
+    "desktop": "electron .",
+    "build:win": "electron-builder --win --x64 --publish never",
+    "build:mac": "electron-builder --mac --x64 --arm64 --publish never"
+  },
+  "devDependencies": {
+    "@babel/standalone": "7.29.0",
+    "electron": "44.4.5",
+    "electron-builder": "26.0.12",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "three": "0.137.5"
+  },
+  "build": {
+    "appId": "ca.nncceducation.newbornbrain3d",
+    "productName": "Newborn Brain 3D",
+    "artifactName": "Newborn-Brain-3D-${version}-${os}-${arch}.${ext}",
+    "asar": true,
+    "npmRebuild": false,
+    "files": [
+      "electron/**/*",
+      "atlas/**/*",
+      "models/**/*",
+      "vendor/**/*",
+      "*.html",
+      "*.css",
+      "*.js",
+      "*.jsx",
+      "*.svg",
+      "*.png",
+      "ATTRIBUTION.md",
+      "LICENSE",
+      "README.md",
+      "!firebase-analytics.js"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["x64", "arm64"] }],
+      "category": "public.app-category.education",
+      "identity": null
+    }
+  }
+}

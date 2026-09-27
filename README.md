@@ -47,6 +47,14 @@ This is an educational atlas, not a patient-specific brain. Do not use it for di
 
 Serve the repository over HTTP and open `index.html`. The model is loaded at runtime from `models/brain.glb`; opening the file directly from disk will not work reliably.
 
+## Offline desktop application
+
+The browser version remains available at the live-site link above. Installable offline editions for Windows and macOS are published separately on the [GitHub Releases page](https://github.com/nncceducation-cpu/brain-atlas-3d/releases/latest).
+
+To build the desktop edition from source, install Node.js and pnpm, then run `pnpm install`, `pnpm run vendor`, and the appropriate platform command: `pnpm run build:win` on Windows or `pnpm run build:mac` on macOS. GitHub Actions builds both Windows x64 and macOS Intel/Apple-silicon downloads whenever a version tag is published.
+
+The desktop wrapper loads the same atlas and features from bundled local files. It does not replace or redirect the website, and it does not require an internet connection for anatomy, slicing, search, lessons, or 3D interaction. External reference links still require internet access.
+
 ## Licensing and attribution
 
 Viewer code is Apache License 2.0. The 3D anatomy assets and derived metadata are CC BY-SA 4.0 and remain under that license. See [LICENSE](LICENSE) and [ATTRIBUTION.md](ATTRIBUTION.md).

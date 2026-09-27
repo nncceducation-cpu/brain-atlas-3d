@@ -1178,6 +1178,10 @@ function Legend({ groups, layerOn, onPoster, posterBusy, onCopyLink, onZoom, mob
       <div style={{ position: 'absolute', right: 8, top: 8, zIndex: 22, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
         <div style={{ display: 'flex', gap: 8 }}>
           {vrBtn}
+          <a href="https://github.com/nncceducation-cpu/brain-atlas-3d/releases/latest" target="_blank" rel="noreferrer"
+            className="glass" style={{ ...zoomBtn, textDecoration: 'none' }} title="Download the offline desktop application" aria-label="Download desktop application">
+            <Icon name="download" size={16} />
+          </a>
           <button onClick={onToggleSpin} className="glass"
             style={autorotate ? { ...zoomBtn, borderColor: 'var(--accent)', color: 'var(--accent)' } : zoomBtn}
             title={autorotate ? 'Pause automatic brain rotation' : 'Resume automatic brain rotation'}
@@ -1209,6 +1213,10 @@ function Legend({ groups, layerOn, onPoster, posterBusy, onCopyLink, onZoom, mob
       )}
       <div style={{ display: 'flex', gap: 8 }}>
         {vrBtn}
+        <a href="https://github.com/nncceducation-cpu/brain-atlas-3d/releases/latest" target="_blank" rel="noreferrer"
+          className="glass" style={{ ...pill, textDecoration: 'none' }} title="Download the offline application for Windows or macOS">
+          <Icon name="download" size={14} /> Desktop app
+        </a>
         {!mobile && (
           <button onClick={() => { setShare(s => !s); setCred(false); }} className="glass" style={pill} title="Share this view: copy a link or download a poster">
             <Icon name="share" size={14} /> Share

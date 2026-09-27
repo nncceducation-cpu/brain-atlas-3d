@@ -34,10 +34,6 @@
   <link rel="apple-touch-icon" href="favicon.svg" />
   <link rel="stylesheet" href="style.css?v=20260926i" />
 
-  <!-- Speed up the third-party model/runtime fetches a touch -->
-  <link rel="preconnect" href="https://unpkg.com" crossorigin />
-  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
-
   <!-- Structured data: helps search engines understand what this is -->
   <script type="application/ld+json">
   {
@@ -61,22 +57,21 @@
   <div id="root"></div>
 
   <!-- Three.js (global build) + GLTF/Draco loaders for the real specimen -->
-  <script src="https://unpkg.com/three@0.137.0/build/three.min.js"></script>
-  <script src="https://unpkg.com/three@0.137.0/examples/js/loaders/GLTFLoader.js"></script>
-  <script src="https://unpkg.com/three@0.137.0/examples/js/loaders/DRACOLoader.js"></script>
-  <script src="https://unpkg.com/three@0.137.0/examples/js/loaders/STLLoader.js"></script>
+  <script src="vendor/three-r137.min.js"></script>
+  <script src="vendor/GLTFLoader-r137.js"></script>
+  <script src="vendor/DRACOLoader-r137.js"></script>
+  <script src="vendor/STLLoader-r137.js"></script>
 
   <!-- React + Babel (pinned, production builds) -->
-  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+  <script src="vendor/react-18.3.1.min.js"></script>
+  <script src="vendor/react-dom-18.3.1.min.js"></script>
+  <script src="vendor/babel-7.29.0.min.js"></script>
 
   <!-- data + scene + analytics (plain JS) -->
   <script src="data.js"></script>
   <script src="systems-data.js"></script>
   <script src="scene.js?v=20260927zag"></script>
   <script src="volume-slice.js?v=20260927v"></script>
-  <script src="firebase-analytics.js"></script>
 
   <!-- UI (Babel/JSX) -->
   <script type="text/babel" src="tweaks-panel.jsx"></script>
@@ -86,6 +81,6 @@
   <script type="text/babel" src="selection-card.jsx"></script>
   <script type="text/babel" src="narration.jsx?v=20260926b"></script>
   <script type="text/babel" src="lessons.jsx"></script>
-  <script type="text/babel" src="app.jsx?v=20260927zf"></script>
+  <script type="text/babel" src="app.jsx?v=20260927zg"></script>
 </body>
 </html>
