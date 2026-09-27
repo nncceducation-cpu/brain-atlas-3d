@@ -461,7 +461,7 @@ function App() {
       if (next) {
         if (!arterialMode) vascularCortexRef.current = cortexOpacity;
         setArterialMode(false);
-        setCortexOpacity(.20);
+        setCortexOpacity(.42);
       } else if (!arterialMode) setCortexOpacity(vascularCortexRef.current);
       flash(next ? 'Cerebral venous system and drainage territories added' : 'Cerebral venous system removed');
       return next;

@@ -114,9 +114,9 @@
     root.add(venousOverlay);
     function venousTube(points, radius, color) {
       const curve = new T.CatmullRomCurve3(points.map(p => new T.Vector3(p[0], p[1], p[2])));
-      const geometry = new T.TubeGeometry(curve, Math.max(12, points.length * 8), radius, 7, false);
-      const material = new T.MeshStandardMaterial({ color, emissive: new T.Color(color).multiplyScalar(.28),
-        roughness:.42, metalness:0, transparent:true, opacity:.94 });
+      const geometry = new T.TubeGeometry(curve, Math.max(14, points.length * 9), radius * .58, 6, false);
+      const material = new T.MeshStandardMaterial({ color, emissive: new T.Color(color).multiplyScalar(.06),
+        roughness:.72, metalness:0, transparent:true, opacity:.86 });
       const mesh = new T.Mesh(geometry, material); mesh.renderOrder = 12; venousOverlay.add(mesh); return mesh;
     }
     // The GLB already contains the superior sagittal sinus. These deliberately
@@ -148,6 +148,41 @@
         [side*1.12,.82,v.z+.03],[side*.98,.94,v.z+.07]
       ], v.r*.58, '#82a8d5');
     });
+    // Fine pial tributaries: irregular short collectors over frontal, parietal,
+    // temporal and occipital convexities. They stay substantially thinner than
+    // Trolard, Labbe and the dural sinuses, avoiding the schematic tube look.
+    const pialSeeds = [
+      {y:.92,z:.82,dy:.28,dz:-.20},{y:.67,z:.66,dy:.42,dz:-.12},
+      {y:.43,z:.48,dy:.33,dz:.18},{y:.18,z:.57,dy:.28,dz:-.24},
+      {y:.83,z:.24,dy:.32,dz:.14},{y:.52,z:.10,dy:.39,dz:-.16},
+      {y:.25,z:-.05,dy:.31,dz:.20},{y:.76,z:-.30,dy:.34,dz:-.15},
+      {y:.45,z:-.46,dy:.38,dz:.17},{y:.12,z:-.55,dy:.27,dz:-.20},
+      {y:.63,z:-.75,dy:.31,dz:.16},{y:.30,z:-.88,dy:.34,dz:.13},
+      {y:-.08,z:.42,dy:.23,dz:-.19},{y:-.25,z:.15,dy:.20,dz:.22},
+      {y:-.32,z:-.31,dy:.24,dz:-.18},{y:-.42,z:-.70,dy:.20,dz:.16}
+    ];
+    [-1,1].forEach(side => pialSeeds.forEach((p, i) => {
+      const skew = ((i % 3) - 1) * .045;
+      venousTube([
+        [side*(1.31 + skew),p.y,p.z],
+        [side*(1.36 - skew*.4),p.y+p.dy*.34,p.z+p.dz*.30],
+        [side*(1.32 + skew*.25),p.y+p.dy*.70,p.z+p.dz*.74],
+        [side*(1.24 - skew),p.y+p.dy,p.z+p.dz]
+      ], i % 4 === 0 ? .010 : .0072, i % 3 === 0 ? '#6e96c7' : '#789dca');
+      if (i % 2 === 0) venousTube([
+        [side*(1.30-skew),p.y+.04,p.z-.12],
+        [side*1.35,p.y+p.dy*.30,p.z-.07+p.dz*.20],
+        [side*(1.31+skew),p.y+p.dy*.52,p.z+p.dz*.46]
+      ], .0054, '#86a7cf');
+    }));
+    // Inferior temporal and occipital tributaries converge on Labbe/transverse
+    // pathways rather than running as parallel superior bridging veins.
+    [-1,1].forEach(side => [-.82,-.48,-.12,.24].forEach((z,i) => {
+      venousTube([
+        [side*1.25,-.48,z+.16],[side*1.35,-.35,z+.08],
+        [side*1.37,-.21,z-.02],[side*1.31,-.08,z-.13]
+      ], .0075 + i*.0007, '#688ebf');
+    }));
     // Superficial middle cerebral (Sylvian) veins, Trolard and Labbe.
     [-1,1].forEach(side => {
       venousTube([[side*1.38,.02,.94],[side*1.47,.13,.69],[side*1.43,.20,.38],[side*1.49,.13,.10],[side*1.40,.08,-.22]], .026, '#5485c3');
@@ -158,6 +193,10 @@
     [-1,1].forEach(side => {
       venousTube([[side*.18,.18,.45],[side*.20,.16,.20],[side*.15,.11,-.08],[side*.17,.07,-.38],[side*.10,.04,-.62],[0,.02,-.78]], .022, '#735da8');
       venousTube([[side*.72,-.28,.55],[side*.69,-.23,.31],[side*.61,-.18,.06],[side*.51,-.17,-.20],[side*.36,-.11,-.46],[side*.18,-.03,-.68],[0,.02,-.78]], .021, '#806ab5');
+      // Anterior cerebral, deep middle cerebral and thalamostriate tributaries.
+      venousTube([[side*.48,.76,.78],[side*.38,.61,.60],[side*.29,.43,.48],[side*.20,.24,.39]], .010, '#738fc2');
+      venousTube([[side*1.22,.08,.55],[side*1.02,.01,.47],[side*.83,-.10,.36],[side*.68,-.22,.22]], .012, '#617fb5');
+      venousTube([[side*.47,.30,.22],[side*.39,.25,.12],[side*.30,.19,.02],[side*.20,.15,-.10]], .009, '#8069ad');
     });
     venousTube([[0,.02,-.78],[0,.12,-.98],[0,.30,-1.12]], .032, '#674f9a');
 
