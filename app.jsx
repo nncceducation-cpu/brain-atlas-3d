@@ -1014,13 +1014,33 @@ function NeonatalSliceView({ slice, layerOn, arterialMode, venousMode }) {
 }
 
 function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer, arterialMode, onToggleArterialMode, venousMode, onToggleVenousMode, mobile }) {
+  const [compact, setCompact] = React.useState(false);
   const names = ['Sagittal', 'Axial', 'Coronal'];
   const directions = ['Right ↔ Left', 'Inferior ↔ Superior', 'Posterior ↔ Anterior'];
-  const update = (i, patch) => onChange(value.map((v, j) => {
-    if (j === i) return { ...v, ...patch };
-    return patch.on === true ? { ...v, on: false } : v;
-  }));
+  const update = (i, patch) => {
+    onChange(value.map((v, j) => {
+      if (j === i) return { ...v, ...patch };
+      return patch.on === true ? { ...v, on: false } : v;
+    }));
+    if (mobile && patch.on === true) setCompact(true);
+  };
   const active = value.some(v => v.on);
+  const activeIndex = value.findIndex(v => v.on);
+  if (mobile && compact && activeIndex >= 0) {
+    const v = value[activeIndex];
+    return (
+      <div className="glass mobile-slice-compact" aria-label={`${names[activeIndex]} slice controls`}>
+        <div className="mobile-slice-compact-title">
+          <strong>{names[activeIndex]}</strong>
+          <span className="mono">{v.value}%</span>
+        </div>
+        <input aria-label={`${names[activeIndex]} slice position`} type="range" min="-100" max="100" step="1" value={v.value}
+          onChange={e => update(activeIndex, { value: Number(e.target.value) })} />
+        <button onClick={() => setCompact(false)} title="Show all MRI controls" aria-label="Show all MRI controls"><Icon name="sliders" size={16} /></button>
+        <button onClick={() => onChange(value.map(item => ({ ...item, on: false })))} title="Clear slice" aria-label="Clear slice"><Icon name="x" size={16} /></button>
+      </div>
+    );
+  }
   return (
     <div className={`glass ${mobile ? 'mobile-slice-panel' : ''}`} style={{ position: 'absolute', right: mobile ? 8 : 16, bottom: mobile ? 64 : 16, zIndex: 18,
       width: mobile ? 'calc(100vw - 16px)' : 'min(470px, calc(100vw - 32px))', padding: '10px 13px', borderRadius: 14, color: 'var(--on-stage)',
@@ -1033,6 +1053,10 @@ function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer, arterialM
           </div>
         </div>
         <div style={{ display: 'flex', gap: 4 }}>
+          {mobile && active && <button onClick={() => setCompact(true)} title="Collapse controls to see the MRI" aria-label="Collapse MRI controls"
+            style={{ padding: '4px 7px', borderRadius: 7, border: '1px solid var(--accent)', background: 'var(--accent-soft)', color: 'var(--on-stage)', fontSize: 9.5 }}>
+            <Icon name="chevDown" size={12} />
+          </button>}
           {['sagittal', 'coronal', 'axial', 'three-quarter'].map(v => (
             <button key={v} onClick={() => onView(v)} title={`${v} view`}
               style={{ padding: '4px 7px', borderRadius: 7, border: '1px solid var(--glass-edge)', background: 'rgba(255,255,255,.07)', color: 'var(--on-stage-soft)', fontSize: 9.5, cursor: 'pointer', textTransform: 'capitalize' }}>
