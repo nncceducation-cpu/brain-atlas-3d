@@ -119,22 +119,45 @@
         roughness:.42, metalness:0, transparent:true, opacity:.94 });
       const mesh = new T.Mesh(geometry, material); mesh.renderOrder = 12; venousOverlay.add(mesh); return mesh;
     }
-    // Superior sagittal receiving channel and bilateral superior cortical veins.
-    venousTube([[0,1.46,1.13],[0,1.58,.55],[0,1.61,-.15],[0,1.46,-.88],[0,1.12,-1.28]], .038, '#436bb2');
-    [-.92,-.52,-.12,.30,.68].forEach(z => {
-      venousTube([[-1.34,.72,z+.10],[-.90,1.15,z],[-.38,1.48,z],[0,1.55,z-.03]], .018, '#6f9bd5');
-      venousTube([[1.34,.72,z+.10],[.90,1.15,z],[.38,1.48,z],[0,1.55,z-.03]], .018, '#6f9bd5');
+    // The GLB already contains the superior sagittal sinus. These deliberately
+    // asymmetric, non-parallel cortical collectors curve over the convexities
+    // and cross the subdural space as short bridging-vein segments.
+    const superiorCollectors = [
+      { z:-.91, entry:-.82, left:[-.08,.08,-.02], right:[.05,-.05,.03], r:.017 },
+      { z:-.57, entry:-.48, left:[.04,-.06,.05], right:[-.07,.06,-.03], r:.020 },
+      { z:-.18, entry:-.10, left:[-.05,.09,-.04], right:[.08,-.03,.06], r:.018 },
+      { z:.22,  entry:.31,  left:[.07,-.03,.04], right:[-.04,.08,-.05], r:.021 },
+      { z:.61,  entry:.72,  left:[-.03,.06,.06], right:[.06,-.07,.02], r:.016 },
+    ];
+    superiorCollectors.forEach((v, i) => {
+      const sidePath = (side, jitter) => [
+        [side*(1.30 + jitter[0]), .64 + jitter[1], v.z + jitter[2]],
+        [side*(1.17 - jitter[1]), .82 + jitter[0], v.z + .10 - jitter[2]],
+        [side*(.91 + jitter[2]), 1.02 - jitter[1], v.z + .03 + jitter[0]],
+        [side*(.64 - jitter[0]), 1.19 + jitter[2], v.entry - .05],
+        [side*(.35 + jitter[1]), 1.31 - jitter[0], v.entry + .025],
+        [side*.10, 1.36 + jitter[1]*.35, v.entry]
+      ];
+      venousTube(sidePath(-1, v.left), v.r, i % 2 ? '#709bd0' : '#648fc9');
+      venousTube(sidePath(1, v.right), v.r * .94, i % 2 ? '#668fc8' : '#76a0d4');
+      // One or two short pial tributaries join each principal collector rather
+      // than repeating another full parallel vein across the hemisphere.
+      const side = i % 2 ? -1 : 1;
+      venousTube([
+        [side*1.29,.48,v.z-.17],[side*1.23,.66,v.z-.09],
+        [side*1.12,.82,v.z+.03],[side*.98,.94,v.z+.07]
+      ], v.r*.58, '#82a8d5');
     });
     // Superficial middle cerebral (Sylvian) veins, Trolard and Labbe.
     [-1,1].forEach(side => {
-      venousTube([[side*1.42,.12,.92],[side*1.48,.18,.42],[side*1.43,.16,-.18]], .026, '#5485c3');
-      venousTube([[side*1.44,.16,.06],[side*1.20,.60,-.12],[side*.78,1.15,-.28],[side*.22,1.52,-.36]], .023, '#6997cf');
-      venousTube([[side*1.44,.12,-.08],[side*1.34,-.18,-.54],[side*.96,-.54,-.92],[side*.58,-.70,-1.18]], .024, '#5278b2');
+      venousTube([[side*1.38,.02,.94],[side*1.47,.13,.69],[side*1.43,.20,.38],[side*1.49,.13,.10],[side*1.40,.08,-.22]], .026, '#5485c3');
+      venousTube([[side*1.43,.12,.02],[side*1.31,.37,-.02],[side*1.10,.65,-.10],[side*.87,.91,-.20],[side*.56,1.16,-.30],[side*.18,1.34,-.39]], .023, '#6997cf');
+      venousTube([[side*1.41,.08,-.11],[side*1.43,-.03,-.31],[side*1.32,-.19,-.53],[side*1.16,-.38,-.73],[side*.91,-.54,-.94],[side*.60,-.62,-1.15]], .024, '#5278b2');
     });
     // Paired internal cerebral veins, basal veins of Rosenthal and great vein of Galen.
     [-1,1].forEach(side => {
-      venousTube([[side*.18,.18,.45],[side*.16,.14,.02],[side*.13,.08,-.54],[0,.02,-.78]], .022, '#735da8');
-      venousTube([[side*.72,-.28,.55],[side*.64,-.20,.10],[side*.44,-.15,-.42],[0,.02,-.78]], .021, '#806ab5');
+      venousTube([[side*.18,.18,.45],[side*.20,.16,.20],[side*.15,.11,-.08],[side*.17,.07,-.38],[side*.10,.04,-.62],[0,.02,-.78]], .022, '#735da8');
+      venousTube([[side*.72,-.28,.55],[side*.69,-.23,.31],[side*.61,-.18,.06],[side*.51,-.17,-.20],[side*.36,-.11,-.46],[side*.18,-.03,-.68],[0,.02,-.78]], .021, '#806ab5');
     });
     venousTube([[0,.02,-.78],[0,.12,-.98],[0,.30,-1.12]], .032, '#674f9a');
 
