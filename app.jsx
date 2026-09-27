@@ -1218,7 +1218,7 @@ function Legend({ groups, layerOn, onPoster, posterBusy, onCopyLink, onZoom, mob
       <div style={{ position: 'absolute', right: 8, top: 8, zIndex: 22, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
         <div style={{ display: 'flex', gap: 8 }}>
           {vrBtn}
-          <a href="https://github.com/nncceducation-cpu/brain-atlas-3d/releases/latest" target="_blank" rel="noreferrer"
+          <a href="download.html"
             className="glass" style={{ ...zoomBtn, textDecoration: 'none' }} title="Download the offline desktop application" aria-label="Download desktop application">
             <Icon name="download" size={16} />
           </a>
@@ -1253,7 +1253,7 @@ function Legend({ groups, layerOn, onPoster, posterBusy, onCopyLink, onZoom, mob
       )}
       <div style={{ display: 'flex', gap: 8 }}>
         {vrBtn}
-        <a href="https://github.com/nncceducation-cpu/brain-atlas-3d/releases/latest" target="_blank" rel="noreferrer"
+        <a href="download.html"
           className="glass" style={{ ...pill, textDecoration: 'none' }} title="Download the offline application for Windows or macOS">
           <Icon name="download" size={14} /> Desktop app
         </a>

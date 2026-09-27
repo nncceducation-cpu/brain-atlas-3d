@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#dbe5ec" />
+  <meta name="description" content="Download Newborn Brain 3D for Windows or macOS and use the neonatal neuroanatomy atlas offline." />
+  <title>Download Newborn Brain 3D</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="download.css?v=20260927a" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Return to Newborn Brain 3D"><span class="brand-mark">◉</span><span><strong>Newborn Brain 3D</strong><small>OFFLINE DESKTOP EDITION</small></span></a>
+    <a class="web-link" href="index.html">Open web atlas</a>
+  </header>
+  <main>
+    <section class="hero">
+      <span class="eyebrow">VERSION 1.0.0 · FREE DOWNLOAD</span>
+      <h1>Take the newborn brain atlas offline.</h1>
+      <p>Choose the installer that matches your computer. The complete 3D anatomy, MRI slicing, vascular overlays, pathways, and Academy lessons are included.</p>
+    </section>
+    <section class="downloads" aria-label="Application downloads">
+      <article class="download-card" data-platform="windows">
+        <span class="tag">Windows</span><h2>Windows PC</h2>
+        <p>For most computers running 64-bit Windows 10 or Windows 11.</p>
+        <a class="download-button" href="https://github.com/nncceducation-cpu/brain-atlas-3d/releases/download/v1.0.0/Newborn-Brain-3D-1.0.0-win-x64.exe">Download Windows installer <span>119 MB</span></a>
+        <ol><li>Open the downloaded <strong>.exe</strong> file.</li><li>If SmartScreen appears, select <strong>More info</strong>, then <strong>Run anyway</strong>.</li><li>Follow the installation prompts.</li></ol>
+      </article>
+      <article class="download-card" data-platform="mac">
+        <span class="tag">Mac · Apple silicon</span><h2>Mac with M-series chip</h2>
+        <p>For Apple Silicon Macs with an M1, M2, M3, M4, M5, or newer chip.</p>
+        <a class="download-button" href="https://github.com/nncceducation-cpu/brain-atlas-3d/releases/download/v1.0.0/Newborn-Brain-3D-1.0.0-mac-arm64.dmg">Download for Apple silicon <span>133 MB</span></a>
+        <ol><li>Double-click the downloaded <strong>.dmg</strong> file.</li><li>Drag <strong>Newborn Brain 3D</strong> into Applications.</li><li>Control-click the app, choose <strong>Open</strong>, then confirm <strong>Open</strong>.</li></ol>
+      </article>
+      <article class="download-card" data-platform="mac">
+        <span class="tag">Mac · Intel</span><h2>Older Intel Mac</h2>
+        <p>For Macs that show <strong>Processor: Intel</strong> in About This Mac.</p>
+        <a class="download-button secondary" href="https://github.com/nncceducation-cpu/brain-atlas-3d/releases/download/v1.0.0/Newborn-Brain-3D-1.0.0-mac-x64.dmg">Download for Intel Mac <span>136 MB</span></a>
+        <ol><li>Double-click the downloaded <strong>.dmg</strong> file.</li><li>Drag the application into Applications.</li><li>Control-click the app and choose <strong>Open</strong> on first launch.</li></ol>
+      </article>
+    </section>
+    <section class="help">
+      <div><h2>Which Mac do I have?</h2><p>Choose Apple menu  → <strong>About This Mac</strong>. If it lists a <strong>Chip</strong> beginning with M, choose Apple silicon. If it lists an Intel <strong>Processor</strong>, choose Intel Mac.</p></div>
+      <div><h2>Why might a warning appear?</h2><p>The first release is not yet code-signed, so Windows or macOS may ask you to confirm that you trust it. The installers are built automatically from the public project source on GitHub.</p></div>
+      <div><h2>No installation needed?</h2><p><a href="index.html">Use the web atlas</a> from any modern browser. It has the same learning features and is optimized for phones and tablets.</p></div>
+    </section>
+  </main>
+  <footer><span>Newborn Brain 3D · Educational visualization</span><a href="https://github.com/nncceducation-cpu/brain-atlas-3d/releases/tag/v1.0.0">Technical release details</a></footer>
+  <script>
+    (() => {
+      const platform = navigator.userAgentData?.platform || navigator.platform || '';
+      const match = /Mac/i.test(platform) ? 'mac' : /Win/i.test(platform) ? 'windows' : '';
+      if (!match) return;
+      document.querySelectorAll('.download-card').forEach(card => card.classList.toggle('recommended', card.dataset.platform === match));
+      const first = document.querySelector(`.download-card[data-platform="${match}"]`);
+      if (first) first.querySelector('.tag').textContent += ' · Recommended for this device';
+    })();
+  </script>
+</body>
+</html>
