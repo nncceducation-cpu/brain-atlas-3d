@@ -1178,6 +1178,12 @@ function Legend({ groups, layerOn, onPoster, posterBusy, onCopyLink, onZoom, mob
       <div style={{ position: 'absolute', right: 8, top: 8, zIndex: 22, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
         <div style={{ display: 'flex', gap: 8 }}>
           {vrBtn}
+          <button onClick={onToggleSpin} className="glass"
+            style={autorotate ? { ...zoomBtn, borderColor: 'var(--accent)', color: 'var(--accent)' } : zoomBtn}
+            title={autorotate ? 'Pause automatic brain rotation' : 'Resume automatic brain rotation'}
+            aria-label={autorotate ? 'Pause brain rotation' : 'Resume brain rotation'}>
+            <Icon name="rotate" size={16} />
+          </button>
           <button onClick={() => onZoom(-1)} className="glass" style={zoomBtn} title="Zoom in"><Icon name="plus" size={16} /></button>
           <button onClick={() => onZoom(1)} className="glass" style={zoomBtn} title="Zoom out"><Icon name="minus" size={16} /></button>
           <button onClick={() => setCred(c => !c)} className="glass" style={pill}><Icon name="info" size={14} /> About</button>
@@ -1213,8 +1219,9 @@ function Legend({ groups, layerOn, onPoster, posterBusy, onCopyLink, onZoom, mob
         </button>
         {!mobile && (
           <button onClick={onToggleSpin} className="glass" style={spinPill}
-            title={autorotate ? 'Stop the automatic spin' : 'Resume the automatic spin'}>
-            <Icon name="rotate" size={14} /> {autorotate ? 'Spinning' : 'Spin'}
+            title={autorotate ? 'Pause automatic brain rotation' : 'Resume automatic brain rotation'}
+            aria-label={autorotate ? 'Pause brain rotation' : 'Resume brain rotation'}>
+            <Icon name="rotate" size={14} /> {autorotate ? 'Pause rotation' : 'Resume rotation'}
           </button>
         )}
       </div>
