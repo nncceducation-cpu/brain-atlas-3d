@@ -241,3 +241,13 @@ These derived nuclei remain under CC BY-SA 4.0 (CC BY 4.0 source material is
 compatible with redistribution inside a CC BY-SA 4.0 work). They are
 APPROXIMATE, registered from MNI-space atlases (~7 mm), for educational use -
 not for clinical or surgical use. See docs/registration.md.
+
+MRI VENOGRAPHY SURFACE
+----------------------
+The file `models/cerebral-venography.stl` is adapted from “CNS Venography 3D
+SR Nevit Dilmen.stl”, an MRI-venography reconstruction by Nevit Dilmen.
+Source: https://commons.wikimedia.org/wiki/File:CNS_Venography_3D_SR_Nevit_Dilmen.stl
+License: Creative Commons Attribution-ShareAlike 3.0 Unported
+https://creativecommons.org/licenses/by-sa/3.0/
+Changes: coordinate-axis remapping, proportional fitting and material styling
+for registration to the Newborn Brain 3D educational model.

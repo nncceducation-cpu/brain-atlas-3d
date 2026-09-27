@@ -39,6 +39,8 @@ The optional venous mode adds a purpose-built superficial and deep cerebral veno
 
 The gross-anatomy surfaces are derived from Z-Anatomy / BodyParts3D. Registered deep structures and tracts in the global view draw on open MNI-space imaging atlases, including CIT168, the Najdenovska thalamic atlas, the Neudorfer hypothalamic atlas, and HCP1065 tract templates. Slice mode instead uses the internally aligned dHCP neonatal label volume.
 
+The optional global cerebral venous overlay uses an MRI-venography-derived surface by Nevit Dilmen, registered and proportionally fitted to the teaching model. It preserves observed vessel asymmetry and calibre variation rather than using hand-drawn tubes. The source is licensed CC BY-SA 3.0; the fit is educational and is not patient-specific neonatal venography.
+
 This is an educational atlas, not a patient-specific brain. Do not use it for diagnosis, lesion localization, stereotactic targeting, or operative planning.
 
 ## Running locally

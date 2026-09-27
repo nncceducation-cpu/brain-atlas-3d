@@ -102,103 +102,30 @@
     const root = new T.Group(); root.rotation.y = -0.25; scene.add(root);
     const model = new T.Group(); root.add(model);   // holds the centered/scaled gltf
 
-    // The source mesh contains the major dural sinuses but not the named
-    // superficial and deep cerebral veins. Add an educational venous network
-    // in the same specimen coordinate system and connect it to those sinuses.
+    // MRI-venography-derived cerebral venous anatomy. Unlike the former
+    // hand-authored tubes, this is an image-derived surface and therefore
+    // preserves the irregular calibre, branching and asymmetry of real veins.
     const venousOverlay = new T.Group();
     venousOverlay.visible = false;
-    // Root-space coordinates are deliberately independent of the GLB's source
-    // units; scale them to the term-newborn cerebral envelope used on stage.
-    venousOverlay.scale.set(.67, .52, .67);
-    venousOverlay.position.y = -.08;
     root.add(venousOverlay);
-    function venousTube(points, radius, color) {
-      const curve = new T.CatmullRomCurve3(points.map(p => new T.Vector3(p[0], p[1], p[2])));
-      const geometry = new T.TubeGeometry(curve, Math.max(14, points.length * 9), radius * .58, 6, false);
-      const material = new T.MeshStandardMaterial({ color, emissive: new T.Color(color).multiplyScalar(.06),
-        roughness:.72, metalness:0, transparent:true, opacity:.86 });
-      const mesh = new T.Mesh(geometry, material); mesh.renderOrder = 12; venousOverlay.add(mesh); return mesh;
-    }
-    // The GLB already contains the superior sagittal sinus. These deliberately
-    // asymmetric, non-parallel cortical collectors curve over the convexities
-    // and cross the subdural space as short bridging-vein segments.
-    const superiorCollectors = [
-      { z:-.91, entry:-.82, left:[-.08,.08,-.02], right:[.05,-.05,.03], r:.017 },
-      { z:-.57, entry:-.48, left:[.04,-.06,.05], right:[-.07,.06,-.03], r:.020 },
-      { z:-.18, entry:-.10, left:[-.05,.09,-.04], right:[.08,-.03,.06], r:.018 },
-      { z:.22,  entry:.31,  left:[.07,-.03,.04], right:[-.04,.08,-.05], r:.021 },
-      { z:.61,  entry:.72,  left:[-.03,.06,.06], right:[.06,-.07,.02], r:.016 },
-    ];
-    superiorCollectors.forEach((v, i) => {
-      const sidePath = (side, jitter) => [
-        [side*(1.30 + jitter[0]), .64 + jitter[1], v.z + jitter[2]],
-        [side*(1.17 - jitter[1]), .82 + jitter[0], v.z + .10 - jitter[2]],
-        [side*(.91 + jitter[2]), 1.02 - jitter[1], v.z + .03 + jitter[0]],
-        [side*(.64 - jitter[0]), 1.19 + jitter[2], v.entry - .05],
-        [side*(.35 + jitter[1]), 1.31 - jitter[0], v.entry + .025],
-        [side*.10, 1.36 + jitter[1]*.35, v.entry]
-      ];
-      venousTube(sidePath(-1, v.left), v.r, i % 2 ? '#709bd0' : '#648fc9');
-      venousTube(sidePath(1, v.right), v.r * .94, i % 2 ? '#668fc8' : '#76a0d4');
-      // One or two short pial tributaries join each principal collector rather
-      // than repeating another full parallel vein across the hemisphere.
-      const side = i % 2 ? -1 : 1;
-      venousTube([
-        [side*1.29,.48,v.z-.17],[side*1.23,.66,v.z-.09],
-        [side*1.12,.82,v.z+.03],[side*.98,.94,v.z+.07]
-      ], v.r*.58, '#82a8d5');
-    });
-    // Fine pial tributaries: irregular short collectors over frontal, parietal,
-    // temporal and occipital convexities. They stay substantially thinner than
-    // Trolard, Labbe and the dural sinuses, avoiding the schematic tube look.
-    const pialSeeds = [
-      {y:.92,z:.82,dy:.28,dz:-.20},{y:.67,z:.66,dy:.42,dz:-.12},
-      {y:.43,z:.48,dy:.33,dz:.18},{y:.18,z:.57,dy:.28,dz:-.24},
-      {y:.83,z:.24,dy:.32,dz:.14},{y:.52,z:.10,dy:.39,dz:-.16},
-      {y:.25,z:-.05,dy:.31,dz:.20},{y:.76,z:-.30,dy:.34,dz:-.15},
-      {y:.45,z:-.46,dy:.38,dz:.17},{y:.12,z:-.55,dy:.27,dz:-.20},
-      {y:.63,z:-.75,dy:.31,dz:.16},{y:.30,z:-.88,dy:.34,dz:.13},
-      {y:-.08,z:.42,dy:.23,dz:-.19},{y:-.25,z:.15,dy:.20,dz:.22},
-      {y:-.32,z:-.31,dy:.24,dz:-.18},{y:-.42,z:-.70,dy:.20,dz:.16}
-    ];
-    [-1,1].forEach(side => pialSeeds.forEach((p, i) => {
-      const skew = ((i % 3) - 1) * .045;
-      venousTube([
-        [side*(1.31 + skew),p.y,p.z],
-        [side*(1.36 - skew*.4),p.y+p.dy*.34,p.z+p.dz*.30],
-        [side*(1.32 + skew*.25),p.y+p.dy*.70,p.z+p.dz*.74],
-        [side*(1.24 - skew),p.y+p.dy,p.z+p.dz]
-      ], i % 4 === 0 ? .010 : .0072, i % 3 === 0 ? '#6e96c7' : '#789dca');
-      if (i % 2 === 0) venousTube([
-        [side*(1.30-skew),p.y+.04,p.z-.12],
-        [side*1.35,p.y+p.dy*.30,p.z-.07+p.dz*.20],
-        [side*(1.31+skew),p.y+p.dy*.52,p.z+p.dz*.46]
-      ], .0054, '#86a7cf');
-    }));
-    // Inferior temporal and occipital tributaries converge on Labbe/transverse
-    // pathways rather than running as parallel superior bridging veins.
-    [-1,1].forEach(side => [-.82,-.48,-.12,.24].forEach((z,i) => {
-      venousTube([
-        [side*1.25,-.48,z+.16],[side*1.35,-.35,z+.08],
-        [side*1.37,-.21,z-.02],[side*1.31,-.08,z-.13]
-      ], .0075 + i*.0007, '#688ebf');
-    }));
-    // Superficial middle cerebral (Sylvian) veins, Trolard and Labbe.
-    [-1,1].forEach(side => {
-      venousTube([[side*1.38,.02,.94],[side*1.47,.13,.69],[side*1.43,.20,.38],[side*1.49,.13,.10],[side*1.40,.08,-.22]], .026, '#5485c3');
-      venousTube([[side*1.43,.12,.02],[side*1.31,.37,-.02],[side*1.10,.65,-.10],[side*.87,.91,-.20],[side*.56,1.16,-.30],[side*.18,1.34,-.39]], .023, '#6997cf');
-      venousTube([[side*1.41,.08,-.11],[side*1.43,-.03,-.31],[side*1.32,-.19,-.53],[side*1.16,-.38,-.73],[side*.91,-.54,-.94],[side*.60,-.62,-1.15]], .024, '#5278b2');
-    });
-    // Paired internal cerebral veins, basal veins of Rosenthal and great vein of Galen.
-    [-1,1].forEach(side => {
-      venousTube([[side*.18,.18,.45],[side*.20,.16,.20],[side*.15,.11,-.08],[side*.17,.07,-.38],[side*.10,.04,-.62],[0,.02,-.78]], .022, '#735da8');
-      venousTube([[side*.72,-.28,.55],[side*.69,-.23,.31],[side*.61,-.18,.06],[side*.51,-.17,-.20],[side*.36,-.11,-.46],[side*.18,-.03,-.68],[0,.02,-.78]], .021, '#806ab5');
-      // Anterior cerebral, deep middle cerebral and thalamostriate tributaries.
-      venousTube([[side*.48,.76,.78],[side*.38,.61,.60],[side*.29,.43,.48],[side*.20,.24,.39]], .010, '#738fc2');
-      venousTube([[side*1.22,.08,.55],[side*1.02,.01,.47],[side*.83,-.10,.36],[side*.68,-.22,.22]], .012, '#617fb5');
-      venousTube([[side*.47,.30,.22],[side*.39,.25,.12],[side*.30,.19,.02],[side*.20,.15,-.10]], .009, '#8069ad');
-    });
-    venousTube([[0,.02,-.78],[0,.12,-.98],[0,.30,-1.12]], .032, '#674f9a');
+    const venographyLoader = new T.STLLoader();
+    venographyLoader.load('./models/cerebral-venography.stl', geometry => {
+      geometry.computeVertexNormals();
+      geometry.center();
+      const mesh = new T.Mesh(geometry, new T.MeshStandardMaterial({
+        color: 0x397fbd, emissive: 0x071a2d, roughness: .56, metalness: 0,
+        transparent: true, opacity: .94, depthWrite: true, clippingPlanes: clipPlanes
+      }));
+      // Source coordinates: X left-right, Y anterior-posterior, Z inferior-superior.
+      // Map them into the viewer's X/Y/Z axes and fit the venogram inside the
+      // neonatal cerebral envelope without changing the other anatomy layers.
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.scale.set(.0107, .0092, .0084);
+      mesh.position.set(0, -.06, -.02);
+      mesh.renderOrder = 12;
+      mesh.userData = { cat: 'veins_sinuses', source: 'MRI venography — Nevit Dilmen, CC BY-SA 3.0' };
+      venousOverlay.add(mesh);
+    }, undefined, err => console.error('[BrainScene] Venography mesh failed:', err));
 
     // logical category registry (we never reparent gltf meshes - keep transforms)
     const cats = {};                       // cat -> { want, targetOpacity, meshes[] }
