@@ -108,6 +108,10 @@
     const venousOverlay = new T.Group();
     venousOverlay.visible = false;
     let venousOverlayActive = false;
+    // The Z-Anatomy specimen is turned 180 degrees around its superior axis
+    // after import. Apply the same presentation transform to the independently
+    // registered venogram so anterior and posterior remain concordant.
+    venousOverlay.rotation.y = Math.PI;
     root.add(venousOverlay);
     const venographyLoader = new T.STLLoader();
     venographyLoader.load('./models/cerebral-venography.stl', geometry => {
@@ -121,8 +125,11 @@
       // Map them into the viewer's X/Y/Z axes and fit the venogram inside the
       // neonatal cerebral envelope without changing the other anatomy layers.
       mesh.rotation.x = -Math.PI / 2;
-      mesh.scale.set(.0107, .0092, .0084);
-      mesh.position.set(0, -.06, -.02);
+      // Fit the outer cortical collectors to the pial envelope (not the inner
+      // parenchymal volume). This keeps superficial cerebral veins on the
+      // surface while the Galenic/internal system remains appropriately deep.
+      mesh.scale.set(.0122, .0105, .0096);
+      mesh.position.set(0, -.03, -.02);
       mesh.renderOrder = 12;
       mesh.userData = { cat: 'veins_sinuses', source: 'MRI venography — Nevit Dilmen, CC BY-SA 3.0' };
       venousOverlay.add(mesh);
