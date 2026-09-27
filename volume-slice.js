@@ -128,7 +128,8 @@
     const voxel = display.geom.voxel(x, y, display.sliceIndex);
     const idx = index3(voxel[0], voxel[1], voxel[2], atlas.meta.shape);
     const structure = atlas.structures[idx], tissue = atlas.tissues[idx];
-    return { structure, tissue, label: STRUCTURE_NAMES[structure] || TISSUE_NAMES[tissue] || null };
+    const atlasLabel = atlas.meta.structureLabels && atlas.meta.structureLabels[String(structure)];
+    return { structure, tissue, label: STRUCTURE_NAMES[structure] || atlasLabel || TISSUE_NAMES[tissue] || null };
   }
 
   function positionForStructures(ids, axis) {

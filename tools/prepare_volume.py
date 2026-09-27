@@ -69,8 +69,10 @@ def main():
     structure_u8 = np.rint(structures).astype(np.uint8)
 
     for name, array in (("t2.u8.gz", intensity), ("tissues.u8.gz", tissue_u8), ("structures.u8.gz", structure_u8)):
-        with gzip.open(DEST / name, "wb", compresslevel=9) as handle:
-            handle.write(array.tobytes(order="F"))
+        # Fixed mtime keeps generated atlas assets byte-for-byte reproducible.
+        with (DEST / name).open("wb") as raw:
+            with gzip.GzipFile(filename="", mode="wb", compresslevel=9, fileobj=raw, mtime=0) as handle:
+                handle.write(array.tobytes(order="F"))
 
     coords = np.where(brain)
     bounds = [[int(axis.min()), int(axis.max())] for axis in coords]
@@ -80,6 +82,12 @@ def main():
             continue
         voxels = np.where(structure_u8 == label)
         structure_centers[str(int(label))] = [round(float(np.median(axis)), 2) for axis in voxels]
+
+    structure_labels = {}
+    for line in (SOURCE / "structures.txt").read_text(encoding="utf-8").splitlines()[1:]:
+        fields = line.split("\t")
+        if len(fields) >= 7 and fields[0].strip().isdigit():
+            structure_labels[fields[0].strip()] = fields[-1].strip()
 
     metadata = {
         "title": "dHCP 40-week neonatal volumetric atlas",
@@ -93,6 +101,7 @@ def main():
         "citation": "Schuh et al. Unbiased construction of a temporally consistent morphological atlas of neonatal brain development (2018).",
         "files": {"intensity": "t2.u8.gz", "tissues": "tissues.u8.gz", "structures": "structures.u8.gz"},
         "structureCenters": structure_centers,
+        "structureLabels": structure_labels,
     }
     (DEST / "volume.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
     shutil.copy2(SOURCE / "tissues.txt", DEST / "tissues.txt")

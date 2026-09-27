@@ -123,6 +123,23 @@ canvas.three { position: absolute; inset: 0; display: block; width: 100%; height
   font-weight: 700;
   pointer-events: none;
 }
+.volume-slice-key {
+  position: absolute;
+  left: 18px;
+  bottom: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  gap: 5px 13px;
+  padding: 8px 10px;
+  border: 1px solid rgba(77,99,113,.16);
+  border-radius: 10px;
+  background: rgba(248,251,253,.86);
+  color: #4d6673;
+  font-size: 9.5px;
+  pointer-events: none;
+}
+.volume-slice-key span { display: flex; align-items: center; gap: 5px; }
+.volume-slice-key i { width: 7px; height: 7px; border-radius: 50%; box-shadow: 0 0 0 1px rgba(34,51,60,.12); }
 .volume-slice-orientation span {
   position: absolute;
   color: #536d7a;

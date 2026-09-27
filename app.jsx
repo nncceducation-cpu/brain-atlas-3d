@@ -901,6 +901,14 @@ function NeonatalSliceView({ slice, layerOn }) {
         <span>{status === 'loading' ? 'Loading volumetric MRI…' : status === 'error' ? error : `Position ${activeSlice.value}% · dHCP T2 + aligned segmentation`}</span>
       </div>
       {hoverLabel && <div className="volume-slice-hover">{hoverLabel}</div>}
+      <div className="volume-slice-key" aria-label="Segmentation color key">
+        <span><i style={{background:'#42beeb'}} />Ventricular CSF</span>
+        <span><i style={{background:'#f4c95c'}} />Corpus callosum</span>
+        <span><i style={{background:'#9779e0'}} />Thalamus</span>
+        <span><i style={{background:'#ef706c'}} />Caudate</span>
+        <span><i style={{background:'#4cb5a6'}} />Lentiform</span>
+        <span><i style={{background:'#5bb279'}} />Hippocampus</span>
+      </div>
       <div className="volume-slice-orientation" aria-hidden="true">
         <span className="top">{activeAxis === 1 ? 'A' : 'S'}</span>
         <span className="bottom">{activeAxis === 1 ? 'P' : 'I'}</span>
