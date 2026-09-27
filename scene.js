@@ -12,11 +12,11 @@
   // per-subsystem self-illumination so hues stay vivid on the dark stage
   const CAT_EMISS = {
     cortex: 0.05, white_matter: 0.16, deep_grey: 0.44, diencephalon: 0.42, brainstem: 0.22,
-    cerebellum: 0.12, ventricles: 0.54, arteries: 0.6, veins_sinuses: 0.5, cranial_nerves: 0.54, meninges_dura: 0.06,
+    cerebellum: 0.08, ventricles: 0.82, arteries: 0.6, veins_sinuses: 0.5, cranial_nerves: 0.54, meninges_dura: 0.06,
     tracts: 0.5,
   };
   // structures kept translucent even at full layer opacity (you see through them)
-  const MAX_OPACITY = { meninges_dura: 0.34, ventricles: 0.9 };
+  const MAX_OPACITY = { meninges_dura: 0.34, ventricles: 1.0 };
   const VESSEL = new Set(['arteries', 'veins_sinuses', 'cranial_nerves', 'tracts']);
   // tone down the very light masses so the cortex doesn't read as neon-white on the dark stage
   const CAT_SHADE = { cortex: 1.0, white_matter: 1.0 };
@@ -38,12 +38,16 @@
   const CSF_SPACES = new Set(['Lateral ventricle', 'Third ventricle', 'Fourth ventricle']);
   function structureColor(cat, node, palette) {
     if (node && STRUCTURE_COLORS[node.label]) return STRUCTURE_COLORS[node.label];
+    if (cat === 'cerebellum') {
+      const label = (node && node.label || '').toLowerCase();
+      return label.includes('peduncle') ? '#BEC2C6' : '#A9ADB2';
+    }
     if (cat === 'ventricles' && (!node || !CSF_SPACES.has(node.label))) return '#B9BEC5';
     return palette[cat];
   }
   function isSectionCore(node) {
     return !!node && (node.category === 'deep_grey' || node.category === 'diencephalon' ||
-      node.label === 'Hippocampus' || node.label === 'Amygdaloid body');
+      node.label === 'Hippocampus' || node.label === 'Amygdaloid body' || CSF_SPACES.has(node.label));
   }
 
   function extras(o) {
@@ -1051,19 +1055,21 @@
         const mid = box.getCenter(new T.Vector3());
         const size = box.getSize(new T.Vector3());
         const color = structureColor(node.category, node, window.BRAIN.palette);
+        const isCSF = CSF_SPACES.has(node.label);
+        const capScale = isCSF ? 0.9 : 0.72;
         const cap = new T.Mesh(sectionCapGeometry, new T.MeshBasicMaterial({ color, side: T.DoubleSide, depthWrite: true }));
-        cap.renderOrder = -5;
+        cap.renderOrder = isCSF ? -3 : -5;
         if (a === 0) {
           cap.rotation.y = Math.PI / 2;
           cap.position.set(center - half + 0.008, mid.y, mid.z);
-          cap.scale.set(Math.max(size.z * 0.72, 0.025), Math.max(size.y * 0.72, 0.025), 1);
+          cap.scale.set(Math.max(size.z * capScale, 0.025), Math.max(size.y * capScale, 0.025), 1);
         } else if (a === 1) {
           cap.rotation.x = -Math.PI / 2;
           cap.position.set(mid.x, center - half + 0.008, mid.z);
-          cap.scale.set(Math.max(size.x * 0.72, 0.025), Math.max(size.z * 0.72, 0.025), 1);
+          cap.scale.set(Math.max(size.x * capScale, 0.025), Math.max(size.z * capScale, 0.025), 1);
         } else {
           cap.position.set(mid.x, mid.y, center + half - 0.008);
-          cap.scale.set(Math.max(size.x * 0.72, 0.025), Math.max(size.y * 0.72, 0.025), 1);
+          cap.scale.set(Math.max(size.x * capScale, 0.025), Math.max(size.y * capScale, 0.025), 1);
         }
         cap.userData.nodeId = node.id;
         sectionCaps.add(cap);

@@ -130,7 +130,7 @@ function useIsMobile(bp) {
 function App() {
   Object.assign(window.BRAIN.palette, {
     cortex:TISSUE_COLORS.cortex, white_matter:TISSUE_COLORS.white_matter, deep_grey:TISSUE_COLORS.deep_grey, diencephalon:'#8D91CF',
-    brainstem:'#D7A06D', cerebellum:'#D98F7B', ventricles:'#74C9E8', arteries:'#E35D70',
+    brainstem:'#D7A06D', cerebellum:'#A9ADB2', ventricles:'#74C9E8', arteries:'#E35D70',
     veins_sinuses:'#667FC4', cranial_nerves:'#D6C765', meninges_dura:'#B96BB1', tracts:'#62B9A8'
   });
   Object.assign(window.BRAIN.descriptions, {
