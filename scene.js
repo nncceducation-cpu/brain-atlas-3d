@@ -19,7 +19,7 @@
   const MAX_OPACITY = { meninges_dura: 0.34, ventricles: 0.9 };
   const VESSEL = new Set(['arteries', 'veins_sinuses', 'cranial_nerves', 'tracts']);
   // tone down the very light masses so the cortex doesn't read as neon-white on the dark stage
-  const CAT_SHADE = { cortex: 0.72, white_matter: 1.0 };
+  const CAT_SHADE = { cortex: 1.0, white_matter: 1.0 };
   function shade(cat, hex) { const c = new T.Color(hex || '#cccccc'); if (CAT_SHADE[cat]) c.multiplyScalar(CAT_SHADE[cat]); return c; }
   const STRUCTURE_COLORS = {
     'Corpus callosum':'#D1D5D9', 'Fornix':'#D8C78A', 'Anterior commissure':'#D8C78A',
@@ -77,7 +77,7 @@
     // structures, so ventricles and deep nuclei remain visible in front.
     const sectionFilm = new T.Mesh(
       new T.CircleGeometry(0.5, 96),
-      new T.MeshBasicMaterial({ color: 0xaeb5bc, side: T.DoubleSide, depthWrite: true, depthTest: true })
+      new T.MeshBasicMaterial({ color: 0xbec2c6, side: T.DoubleSide, depthWrite: true, depthTest: true })
     );
     sectionFilm.visible = false;
     sectionFilm.renderOrder = -10;
@@ -968,31 +968,70 @@
       const t = (Math.max(-100, Math.min(100, Number(sliceState[a].value) || 0)) + 100) / 200;
       const center = T.MathUtils.lerp(lo, hi, t);
       const half = Math.max((hi - lo) * 0.022, 0.035);
-      const xSize = clipBounds[0].y - clipBounds[0].x;
-      const ySize = clipBounds[1].y - clipBounds[1].x;
-      const zSize = clipBounds[2].y - clipBounds[2].x;
-      const xMid = (clipBounds[0].x + clipBounds[0].y) / 2;
-      const yMid = (clipBounds[1].x + clipBounds[1].y) / 2;
-      const zMid = (clipBounds[2].x + clipBounds[2].y) / 2;
+      updateCorticalBacking(a, center, half);
       sectionFilm.rotation.set(0, 0, 0);
-      sectionFilm.position.set(xMid, yMid, zMid);
+      sectionFilm.position.set(0, 0, 0);
       if (a === 0) {
         // Sagittal viewer is on +X; place film at the far face of the slab.
         sectionFilm.rotation.y = Math.PI / 2;
         sectionFilm.position.x = center - half - 0.004;
-        sectionFilm.scale.set(zSize * 0.88, ySize * 0.84, 1);
+        sectionFilm.scale.set(1, 1, 1);
       } else if (a === 1) {
         // Axial viewer is superior (+Y).
         sectionFilm.rotation.x = -Math.PI / 2;
         sectionFilm.position.y = center - half - 0.004;
-        sectionFilm.scale.set(xSize * 0.88, zSize * 0.84, 1);
+        sectionFilm.scale.set(1, 1, 1);
       } else {
         // Coronal viewer is anterior-facing from -Z.
         sectionFilm.position.z = center + half + 0.004;
-        sectionFilm.scale.set(xSize * 0.88, ySize * 0.84, 1);
+        sectionFilm.scale.set(1, 1, 1);
       }
       sectionFilm.visible = true;
       updateSectionCaps(a, center, half);
+    }
+
+    // Build the white-matter compartment from cortical vertices close to this
+    // exact section. A small inset keeps the fill beneath the cortical ribbon.
+    function updateCorticalBacking(a, center, half) {
+      const pts = [];
+      const p = new T.Vector3();
+      const tolerance = Math.max(half * 3.2, 0.08);
+      (cats.cortex && cats.cortex.meshes || []).forEach(m => {
+        const attr = m.geometry && m.geometry.attributes && m.geometry.attributes.position;
+        if (!attr) return;
+        const step = Math.max(1, Math.floor(attr.count / 90));
+        for (let i = 0; i < attr.count; i += step) {
+          p.fromBufferAttribute(attr, i).applyMatrix4(m.matrixWorld);
+          const coord = a === 0 ? p.x : (a === 1 ? p.y : p.z);
+          if (Math.abs(coord - center) > tolerance) continue;
+          if (a === 0) pts.push({ x: -p.z, y: p.y });
+          else if (a === 1) pts.push({ x: p.x, y: -p.z });
+          else pts.push({ x: p.x, y: p.y });
+        }
+      });
+      if (pts.length < 3) return;
+      pts.sort((u, v) => u.x - v.x || u.y - v.y);
+      const cross = (o, u, v) => (u.x - o.x) * (v.y - o.y) - (u.y - o.y) * (v.x - o.x);
+      const lower = [];
+      pts.forEach(q => { while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], q) <= 0) lower.pop(); lower.push(q); });
+      const upper = [];
+      for (let i = pts.length - 1; i >= 0; i--) {
+        const q = pts[i];
+        while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], q) <= 0) upper.pop();
+        upper.push(q);
+      }
+      lower.pop(); upper.pop();
+      const hull = lower.concat(upper);
+      if (hull.length < 3) return;
+      const cx = hull.reduce((s, q) => s + q.x, 0) / hull.length;
+      const cy = hull.reduce((s, q) => s + q.y, 0) / hull.length;
+      const inset = hull.map(q => ({ x: cx + (q.x - cx) * 0.94, y: cy + (q.y - cy) * 0.94 }));
+      const shape = new T.Shape();
+      shape.moveTo(inset[0].x, inset[0].y);
+      for (let i = 1; i < inset.length; i++) shape.lineTo(inset[i].x, inset[i].y);
+      shape.closePath();
+      if (sectionFilm.geometry) sectionFilm.geometry.dispose();
+      sectionFilm.geometry = new T.ShapeGeometry(shape);
     }
 
     function updateSectionCaps(a, center, half) {

@@ -1,7 +1,7 @@
 /* Brain Project - app composition, state & scene wiring */
 
 const CAT_ORDER = window.BRAIN.depth; // outer -> inner peel order
-const TISSUE_COLORS = { cortex: '#8F949B', white_matter: '#C4C9CE', deep_grey: '#747A82' };
+const TISSUE_COLORS = { cortex: '#A9ADB2', white_matter: '#BEC2C6', deep_grey: '#747A82' };
 const SHORT = {
   meninges_dura: 'Dura & falx', veins_sinuses: 'Sinuses', arteries: 'Arteries', cortex: 'Cortex',
   white_matter: 'White matter', deep_grey: 'Deep grey', diencephalon: 'Diencephalon',
