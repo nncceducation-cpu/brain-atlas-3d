@@ -416,12 +416,21 @@ function App() {
     setLayerOn(o); setCortexOpacity(p.cortex);
     if (p.slice) {
       setHemisphere('both');
-      const targetNodes = (p.slice.targets || (p.slice.target ? [p.slice.target] : []))
-        .flatMap(label => nodes.filter(n => n.label === label));
-      const measured = targetNodes.length && sceneRef.current && sceneRef.current.slicePositionForNodes
-        ? sceneRef.current.slicePositionForNodes(targetNodes.map(n => n.id), p.slice.axis) : null;
-      const sliceValue = Number.isFinite(measured) ? Math.round(measured) : (p.slice.value || 0);
+      const volumeLabelIds = {
+        'Corpus callosum': [48], 'Lateral ventricle': [49, 50], 'Third ventricle': [49, 50],
+        'Hippocampus': [1, 2], 'Amygdala': [3, 4], 'Thalamus': [42, 43, 86, 87]
+      };
+      const requestedLabels = p.slice.targets || (p.slice.target ? [p.slice.target] : []);
+      const structureIds = requestedLabels.flatMap(label => volumeLabelIds[label] || []);
+      const atlasPosition = window.NeonatalVolume && window.NeonatalVolume.positionForStructures(structureIds, p.slice.axis);
+      const sliceValue = Number.isFinite(atlasPosition) ? atlasPosition : (p.slice.value || 0);
       setSlice([0,1,2].map(axis => ({ on: axis === p.slice.axis, value: axis === p.slice.axis ? sliceValue : 0, flip: false })));
+      if (structureIds.length && window.NeonatalVolume) {
+        window.NeonatalVolume.load().then(() => {
+          const resolved = window.NeonatalVolume.positionForStructures(structureIds, p.slice.axis);
+          if (Number.isFinite(resolved)) setSlice([0,1,2].map(axis => ({ on: axis === p.slice.axis, value: axis === p.slice.axis ? resolved : 0, flip: false })));
+        }).catch(() => {});
+      }
       setTweak('autorotate', false);
       setTimeout(() => {
         if (sceneRef.current) { sceneRef.current.setAutoRotate(false); sceneRef.current.setView(p.view); }
@@ -732,13 +741,17 @@ function App() {
     <React.Fragment>
       <div className="stage" />
       <canvas ref={canvasRef} className="three" />
+      {slice.some(v => v.on) && (
+        <NeonatalSliceView slice={slice} layerOn={layerOn} />
+      )}
 
       {/* corner toolbar: save poster · credits · shuffle palette · subsystem key */}
       <Legend groups={groups} layerOn={layerOn} onPoster={savePoster} posterBusy={posterBusy} onCopyLink={copyShareLink} onZoom={zoom} mobile={mobile}
-        autorotate={t.autorotate} onToggleSpin={() => setTweak('autorotate', !t.autorotate)}
+        autorotate={slice.some(v => v.on) ? false : t.autorotate}
+        onToggleSpin={() => slice.some(v => v.on) ? flash('Rotation is paused in MRI section view') : setTweak('autorotate', !t.autorotate)}
         vrSupported={vrSupported} vrActive={vrActive} onEnterVR={enterVR} onExitVR={exitVR} />
 
-      {hint && consent && !mobile && (
+      {hint && consent && !mobile && !slice.some(v => v.on) && (
         <div className="pop" style={{ position: 'absolute', bottom: 18, left: '50%', transform: 'translateX(-50%)', zIndex: 12,
           display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 99,
           background: 'rgba(8,11,18,0.55)', color: 'var(--on-stage)', fontSize: 12.5, fontWeight: 500, backdropFilter: 'blur(8px)',
@@ -830,6 +843,74 @@ function App() {
   );
 }
 
+function NeonatalSliceView({ slice, layerOn }) {
+  const canvasRef = React.useRef(null);
+  const displayRef = React.useRef(null);
+  const atlasRef = React.useRef(null);
+  const [status, setStatus] = React.useState('loading');
+  const [error, setError] = React.useState('');
+  const [hoverLabel, setHoverLabel] = React.useState('');
+  const activeAxis = Math.max(0, slice.findIndex(v => v.on));
+  const activeSlice = slice[activeAxis] || slice[0];
+  const planeNames = ['Sagittal', 'Axial', 'Coronal'];
+
+  React.useEffect(() => {
+    let alive = true;
+    window.NeonatalVolume.load().then(atlas => {
+      if (!alive) return;
+      atlasRef.current = atlas;
+      setStatus('ready');
+    }).catch(err => {
+      if (!alive) return;
+      setError(err.message || String(err)); setStatus('error');
+    });
+    return () => { alive = false; };
+  }, []);
+
+  React.useEffect(() => {
+    if (status !== 'ready' || !canvasRef.current || !atlasRef.current) return;
+    displayRef.current = window.NeonatalVolume.render(canvasRef.current, atlasRef.current,
+      activeAxis, activeSlice.value, {
+        cortex: !!layerOn.cortex,
+        white_matter: !!layerOn.white_matter,
+        ventricles: !!layerOn.ventricles,
+      });
+  }, [status, activeAxis, activeSlice.value, layerOn.cortex, layerOn.white_matter, layerOn.ventricles]);
+
+  const inspect = (event) => {
+    if (!atlasRef.current || !displayRef.current) return;
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const imageAspect = canvas.width / canvas.height;
+    const boxAspect = rect.width / rect.height;
+    let shownW, shownH, left, top;
+    if (boxAspect > imageAspect) { shownH = rect.height; shownW = shownH * imageAspect; left = (rect.width - shownW) / 2; top = 0; }
+    else { shownW = rect.width; shownH = shownW / imageAspect; left = 0; top = (rect.height - shownH) / 2; }
+    const px = event.clientX - rect.left - left, py = event.clientY - rect.top - top;
+    if (px < 0 || py < 0 || px >= shownW || py >= shownH) { setHoverLabel(''); return; }
+    const hit = window.NeonatalVolume.voxelAt(displayRef.current,
+      px / shownW * canvas.width, py / shownH * canvas.height, atlasRef.current);
+    setHoverLabel(hit && hit.label ? hit.label : '');
+  };
+
+  return (
+    <div className="volume-slice-view" onMouseMove={inspect} onMouseLeave={() => setHoverLabel('')}>
+      <canvas ref={canvasRef} className="volume-slice-canvas" aria-label={`${planeNames[activeAxis]} neonatal MRI atlas section`} />
+      <div className="volume-slice-status">
+        <strong>{planeNames[activeAxis]} · 40-week neonatal atlas</strong>
+        <span>{status === 'loading' ? 'Loading volumetric MRI…' : status === 'error' ? error : `Position ${activeSlice.value}% · dHCP T2 + aligned segmentation`}</span>
+      </div>
+      {hoverLabel && <div className="volume-slice-hover">{hoverLabel}</div>}
+      <div className="volume-slice-orientation" aria-hidden="true">
+        <span className="top">{activeAxis === 1 ? 'A' : 'S'}</span>
+        <span className="bottom">{activeAxis === 1 ? 'P' : 'I'}</span>
+        <span className="left">{activeAxis === 0 ? 'A' : 'R'}</span>
+        <span className="right">{activeAxis === 0 ? 'P' : 'L'}</span>
+      </div>
+    </div>
+  );
+}
+
 function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer }) {
   const names = ['Sagittal', 'Axial', 'Coronal'];
   const directions = ['Right ↔ Left', 'Inferior ↔ Superior', 'Posterior ↔ Anterior'];
@@ -839,12 +920,12 @@ function SlicePanel({ value, onChange, onView, layerOn, onToggleLayer }) {
   }));
   const active = value.some(v => v.on);
   return (
-    <div className="glass" style={{ position: 'absolute', left: '50%', bottom: 16, transform: 'translateX(-50%)', zIndex: 18,
-      width: 470, padding: '10px 13px', borderRadius: 14, color: 'var(--on-stage)' }}>
+    <div className="glass" style={{ position: 'absolute', right: 16, bottom: 16, zIndex: 18,
+      width: 'min(470px, calc(100vw - 32px))', padding: '10px 13px', borderRadius: 14, color: 'var(--on-stage)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 7 }}>
         <div>
           <div className="eyebrow-light" style={{ fontSize: 10, fontWeight: 750, letterSpacing: '.1em' }}>ANATOMICAL SECTION</div>
-          <div style={{ fontSize: 8.5, color: 'var(--on-stage-soft)', opacity: .78, marginTop: 2 }}>Filled tissue section · fixed atlas plane</div>
+          <div style={{ fontSize: 8.5, color: 'var(--on-stage-soft)', opacity: .78, marginTop: 2 }}>Real 40-week T2 MRI · aligned dHCP labels</div>
         </div>
         <div style={{ display: 'flex', gap: 4 }}>
           {['sagittal', 'coronal', 'axial', 'three-quarter'].map(v => (

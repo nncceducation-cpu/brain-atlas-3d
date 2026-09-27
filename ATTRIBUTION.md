@@ -12,10 +12,11 @@ This site incorporates and adapts the open anatomical viewer and model from:
 
 The viewer source is used under the Apache License 2.0. The 3D anatomy assets (`models/brain.glb`) and derived anatomical metadata are used and redistributed under **Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0)**. Modified versions of these assets remain available under the same license.
 
-This educational model is approximate and is not intended for clinical use.
+The orthogonal section viewer uses aligned atlas voxels rather than reconstructed mesh caps. This remains a population-average educational model and is not intended for clinical use.
 
 ## Neonatal anatomy references
 
+- Schuh A, Makropoulos A, Robinson EC, et al. *Unbiased construction of a temporally consistent morphological atlas of neonatal brain development*. 2018. The bundled 40-week T2 volume, tissue segmentation, and 87-region structural segmentation are adapted from the Developing Human Connectome Project volumetric atlas under **CC BY 4.0**: https://gin.g-node.org/BioMedIA/dhcp-volumetric-atlas-groupwise
 - Meijler G, Mohammad K, editors. *Neonatal Brain Injury: An Illustrated Guide for Clinicians Counselling Parents and Caregivers*. Springer Nature; 2024. Chapter 2, Normal Anatomy. CC BY 4.0. https://doi.org/10.1007/978-3-031-55972-3
 - Rutherford MA, editor. *MRI of the Neonatal Brain*. https://www.mrineonatalbrain.com/. Used as a textual anatomy and maturation reference. Website figures are not redistributed.
 

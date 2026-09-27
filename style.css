@@ -74,6 +74,71 @@ body { overflow: hidden; background: #D7E2E9; color: var(--ink); }
 }
 canvas.three { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
 
+.volume-slice-view {
+  position: absolute;
+  inset: 0 min(40vw, 520px) 0 0;
+  z-index: 3;
+  overflow: hidden;
+  background: #dbe4ec;
+}
+.volume-slice-canvas {
+  position: absolute;
+  inset: 4.5% 3% 16%;
+  width: 94%;
+  height: 79.5%;
+  object-fit: contain;
+  display: block;
+  background: #dbe4ec;
+  filter: contrast(1.04);
+}
+.volume-slice-status {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 13px;
+  border: 1px solid rgba(77,99,113,.18);
+  border-radius: 11px;
+  background: rgba(248,251,253,.9);
+  box-shadow: 0 6px 22px rgba(40,57,68,.09);
+  color: #2f4551;
+  pointer-events: none;
+}
+.volume-slice-status strong { font-size: 12px; }
+.volume-slice-status span { font-size: 10px; color: #607783; }
+.volume-slice-hover {
+  position: absolute;
+  top: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: rgba(28,43,52,.9);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  pointer-events: none;
+}
+.volume-slice-orientation span {
+  position: absolute;
+  color: #536d7a;
+  font: 700 11px/1 var(--mono);
+  opacity: .82;
+  pointer-events: none;
+}
+.volume-slice-orientation .top { top: 62px; left: 50%; }
+.volume-slice-orientation .bottom { bottom: 19%; left: 50%; }
+.volume-slice-orientation .left { left: 18px; top: 44%; }
+.volume-slice-orientation .right { right: 18px; top: 44%; }
+
+@media (max-width: 1100px) {
+  .volume-slice-view { right: 380px; }
+}
+
 /* ---------- floating window chrome ---------- */
 .glass {
   background: var(--glass);
