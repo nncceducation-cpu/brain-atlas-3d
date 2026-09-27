@@ -347,19 +347,22 @@
       const x = p.x / Math.max(half.x, 1e-6);      // right/left
       const ap = p.y / Math.max(half.y, 1e-6);     // anterior/posterior in source scan
       const si = p.z / Math.max(half.z, 1e-6);     // inferior/superior
-      const side = x < 0 ? 'Left ' : 'Right ';
-      // Ordered from the distinctive dural collectors to progressively smaller
-      // cortical/deep territories. Labels are regional because the venogram is
-      // one continuous patient-derived surface, not separate named meshes.
-      if (Math.abs(x) < .13 && si > .30) return 'Superior sagittal sinus';
-      if (Math.abs(x) < .16 && si < -.16 && ap < .15) return 'Straight sinus / vein of Galen region';
-      if (Math.abs(x) > .32 && si < -.12 && ap < -.18) return side + 'transverse sinus';
-      if (Math.abs(x) > .58 && si < -.28) return side + 'sigmoid sinus';
-      if (Math.abs(x) < .26 && Math.abs(si) < .24) return 'Deep cerebral venous system';
-      if (Math.abs(x) > .48 && Math.abs(si) < .24 && ap > -.18) return side + 'superficial middle cerebral vein';
-      if (si > .18 && Math.abs(x) > .15) return side + 'superior cerebral veins';
-      if (si < -.18 && Math.abs(x) > .20) return side + 'inferior cerebral veins';
-      return side + 'cortical cerebral veins';
+      // The venogram is a single connected scan surface without semantic
+      // segments. Name only collectors whose position is anatomically
+      // distinctive; do not invent a named vein from a broad coordinate zone.
+      // In source space +AP is posterior after registration to this specimen.
+      if (Math.abs(x) < .14 && si > .18) return 'Superior sagittal sinus';
+      if (Math.abs(x) < .18 && ap > .52 && si > -.08 && si < .22) return 'Confluence of sinuses (torcular)';
+      if (Math.abs(x) > .25 && ap > .34 && si > -.30 && si < .10) return 'Transverse sinus';
+      if (Math.abs(x) > .42 && ap > .22 && si < -.52) return 'Internal jugular vein';
+      if (Math.abs(x) > .52 && ap > .18 && si < -.22) return 'Sigmoid sinus';
+      if (Math.abs(x) < .17 && ap > .18 && si > -.22 && si < .12) return 'Straight sinus';
+      if (Math.abs(x) < .20 && ap > .02 && si > -.16 && si < .18) return 'Great cerebral vein (vein of Galen) region';
+      if (Math.abs(x) > .12 && Math.abs(x) < .46 && ap < -.24 && si < -.20) return 'Cavernous sinus region';
+      if (Math.abs(x) < .34 && Math.abs(ap) < .34 && Math.abs(si) < .25) return 'Deep cerebral veins';
+      if (si > .14) return 'Superficial cerebral vein';
+      if (si < -.16) return 'Inferior cerebral vein';
+      return 'Cortical cerebral vein';
     }
     function pickAt(e) {
       const r = dom.getBoundingClientRect();
