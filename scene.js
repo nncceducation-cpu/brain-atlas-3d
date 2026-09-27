@@ -25,7 +25,10 @@
     'Corpus callosum':'#D1D5D9', 'Fornix':'#D8C78A', 'Anterior commissure':'#D8C78A',
     'Caudate nucleus':'#69A8A6', 'Putamen':'#C69B5A', 'Globus pallidus external':'#A889B7',
     'Globus pallidus internal':'#8C70A2', 'Nucleus accumbens':'#D58A93', 'Subthalamic nucleus':'#B47E65',
-    'Substantia nigra':'#6D6464', 'Thalamus':'#778CC2', 'Pulvinar':'#7183B2',
+    'Substantia nigra':'#6D6464', 'Thalamus':'#778CC2', 'Pulvinar':'#6E78B5',
+    'Anterior nuclei of thalamus':'#7B97CC', 'Mediodorsal nucleus':'#8D7FB8',
+    'Ventral anterior nucleus':'#68A1B6', 'Ventral laterodorsal nucleus':'#5F8DB2',
+    'Ventral lateroventral nucleus':'#557C9F', 'Intralaminar and lateral posterior nuclei':'#987CA9',
     'Hippocampus':'#78A477', 'Amygdaloid body':'#C97986', 'Optic radiation':'#74AFC1',
     'Adenohypophysis':'#D98272', 'Neurohypophysis':'#C56F8D', 'Pineal gland':'#B88A67',
     // These structures were historically grouped with the ventricular system,
@@ -37,6 +40,10 @@
     if (node && STRUCTURE_COLORS[node.label]) return STRUCTURE_COLORS[node.label];
     if (cat === 'ventricles' && (!node || !CSF_SPACES.has(node.label))) return '#B9BEC5';
     return palette[cat];
+  }
+  function isSectionCore(node) {
+    return !!node && (node.category === 'deep_grey' || node.category === 'diencephalon' ||
+      node.label === 'Hippocampus' || node.label === 'Amygdaloid body');
   }
 
   function extras(o) {
@@ -75,6 +82,10 @@
     sectionFilm.visible = false;
     sectionFilm.renderOrder = -10;
     scene.add(sectionFilm);
+    const sectionCaps = new T.Group();
+    const sectionCapGeometry = new T.CircleGeometry(0.5, 48);
+    sectionCaps.renderOrder = -5;
+    scene.add(sectionCaps);
     const camera = new T.PerspectiveCamera(38, 1, 0.01, 200);
 
     // lights - soft clinical key + cool/warm rims for the "designed" stage
@@ -158,7 +169,10 @@
       model.scale.set(1.64 / r, 1.73 / r, 1.69 / r);
       // anatomical upright: Z-Anatomy exports anterior toward +Z; face the camera
       model.rotation.y = Math.PI;
-      model.updateMatrixWorld(true);
+      // Measure slice bounds in the un-yawed anatomical pose. The -0.25 rad
+      // overview presentation angle must never leak into atlas coordinates.
+      root.rotation.y = 0;
+      root.updateMatrixWorld(true);
       // Drive the controls from the cerebral envelope, not the full scene. The
       // latter includes the inferior brainstem and long vessels, which made much
       // of the axial slider show empty space before reaching the cerebrum.
@@ -168,6 +182,8 @@
       clipBounds[0].set(specimenBounds.min.x, specimenBounds.max.x);
       clipBounds[1].set(specimenBounds.min.y, specimenBounds.max.y);
       clipBounds[2].set(specimenBounds.min.z, specimenBounds.max.z);
+      root.rotation.y = -0.25;
+      root.updateMatrixWorld(true);
 
       loaded = true;
       // apply whatever the React app already asked for, then settle instantly
@@ -937,7 +953,17 @@
        not voxel tissue; synthetic caps would imply false histology. */
     function updateSectionFilm() {
       const a = sliceState.findIndex(s => s.enabled);
-      if (a < 0) { sectionFilm.visible = false; return; }
+      if (a < 0) {
+        sectionFilm.visible = false;
+        sectionCaps.visible = false;
+        root.rotation.y = -0.25;
+        root.updateMatrixWorld(true);
+        return;
+      }
+      // The overview starts with a slight presentation yaw. Anatomical planes
+      // must not inherit it: align the specimen before applying world-axis cuts.
+      root.rotation.y = 0;
+      root.updateMatrixWorld(true);
       const lo = clipBounds[a].x, hi = clipBounds[a].y;
       const t = (Math.max(-100, Math.min(100, Number(sliceState[a].value) || 0)) + 100) / 200;
       const center = T.MathUtils.lerp(lo, hi, t);
@@ -966,6 +992,45 @@
         sectionFilm.scale.set(xSize * 0.88, ySize * 0.84, 1);
       }
       sectionFilm.visible = true;
+      updateSectionCaps(a, center, half);
+    }
+
+    function updateSectionCaps(a, center, half) {
+      sectionCaps.children.forEach(c => c.material && c.material.dispose());
+      sectionCaps.clear();
+      const seen = new Set();
+      window.BRAIN.nodes.forEach(node => {
+        if (!isSectionCore(node) || seen.has(node.id)) return;
+        const meshes = meshById.get(node.id) || [];
+        if (!meshes.length) return;
+        const box = new T.Box3().makeEmpty();
+        meshes.forEach(m => box.expandByObject(m));
+        if (box.isEmpty()) return;
+        const min = a === 0 ? box.min.x : (a === 1 ? box.min.y : box.min.z);
+        const max = a === 0 ? box.max.x : (a === 1 ? box.max.y : box.max.z);
+        if (center < min - half || center > max + half) return;
+        const mid = box.getCenter(new T.Vector3());
+        const size = box.getSize(new T.Vector3());
+        const color = structureColor(node.category, node, window.BRAIN.palette);
+        const cap = new T.Mesh(sectionCapGeometry, new T.MeshBasicMaterial({ color, side: T.DoubleSide, depthWrite: true }));
+        cap.renderOrder = -5;
+        if (a === 0) {
+          cap.rotation.y = Math.PI / 2;
+          cap.position.set(center - half + 0.008, mid.y, mid.z);
+          cap.scale.set(Math.max(size.z * 0.72, 0.025), Math.max(size.y * 0.72, 0.025), 1);
+        } else if (a === 1) {
+          cap.rotation.x = -Math.PI / 2;
+          cap.position.set(mid.x, center - half + 0.008, mid.z);
+          cap.scale.set(Math.max(size.x * 0.72, 0.025), Math.max(size.z * 0.72, 0.025), 1);
+        } else {
+          cap.position.set(mid.x, mid.y, center + half - 0.008);
+          cap.scale.set(Math.max(size.x * 0.72, 0.025), Math.max(size.y * 0.72, 0.025), 1);
+        }
+        cap.userData.nodeId = node.id;
+        sectionCaps.add(cap);
+        seen.add(node.id);
+      });
+      sectionCaps.visible = true;
     }
 
     function setSlice(axis, enabled, value) {

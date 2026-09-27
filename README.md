@@ -24,7 +24,7 @@ The NNCC interface uses an original dark clinical-workspace design with a right-
 - Shareable views and high-resolution poster export
 - Keyboard navigation: `1` Explore, `2` Systems, `3` Learn, `/` search, `R` reset
 
-The anatomical-section controls use narrow, camera-independent atlas-space slabs, double-sided tissue surfaces, and a contour-limited tissue backing that fills surface-mesh gaps without adding a rectangular frame. The present model is still a surface atlas, not a neonatal MRI labelmap: cut faces are therefore not diagnostic MRI sections and fine landmarks absent from the source are explicitly reported rather than invented. A licensed neonatal volumetric labelmap is required for fully filled, voxel-accurate sections.
+The anatomical-section controls remove the overview yaw before applying narrow atlas-space cuts, add a contour-limited white-matter backing, and generate filled intersection caps for deep nuclei and limbic structures. This prevents bilateral offset and hollow-shell artifacts without adding a rectangular frame. The present model is still a surface atlas, not a neonatal MRI labelmap: these educational section caps are geometry-derived approximations, not diagnostic MRI. A licensed neonatal volumetric labelmap is required for voxel-accurate sections.
 
 ## Accuracy and intended use
 
