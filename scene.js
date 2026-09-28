@@ -330,6 +330,11 @@
     const ray = new T.Raycaster();
     const ndc = new T.Vector2();
     let hovered = null, selectedIds = new Set();
+    // Deliberately different from every anatomical palette entry: hover must
+    // identify the complete structure at a glance, not merely add a faint
+    // same-colour glow that disappears against neighbouring tissue.
+    const HOVER_COLOR = new T.Color(0xffc247);
+    const HOVER_EMISSIVE = new T.Color(0xff9f1c);
 
     // ---- functional-system highlight mode (Systems / Learn) ----
     // when on, the loop ignores the per-category layer state and instead
@@ -1006,6 +1011,10 @@
           // translucent meshes must not write depth, or they cull what's behind them
           m.material.depthWrite = m.material.opacity >= 0.98;
           m.visible = m.material.opacity > 0.012;
+          const isHover = hovered && (
+            m === hovered ||
+            (m.userData.nodeId != null && m.userData.nodeId === hovered.userData.nodeId)
+          );
           if (isSel && inVR) {
             // in VR (dark stage, no HTML card) a darker shade reads as "vanished" -
             // so the selection BRIGHTENS and breathes to clearly stand out instead
@@ -1015,12 +1024,18 @@
             // selected: render as a noticeably DARKER shade of its own colour
             m.material.color.copy(m.userData.baseColor).multiplyScalar(0.38);
             m.material.emissive.copy(m.userData.baseColor).multiplyScalar(m.userData.baseEmiss * 0.5);
+          } else if (isHover) {
+            // A temporary high-contrast amber highlight makes the full hovered
+            // structure unmistakable. Base materials remain in userData and
+            // are restored exactly by the normal branch on pointer exit.
+            m.material.color.copy(HOVER_COLOR);
+            m.material.emissive.copy(HOVER_EMISSIVE).multiplyScalar(inVR ? 0.72 : 0.48);
           } else {
             m.material.color.copy(m.userData.baseColor);
-            let e = m.userData.baseEmiss + (m === hovered ? (inVR ? 0.35 : 0.2) : 0);
+            let e = m.userData.baseEmiss;
             m.material.emissive.copy(m.userData.baseColor).multiplyScalar(e);
           }
-          m.renderOrder = isSel ? 2 : 0;
+          m.renderOrder = isSel ? 2 : (isHover ? 1 : 0);
         });
       }
       renderer.render(scene, camera);
