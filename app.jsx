@@ -872,6 +872,12 @@ function App() {
         </nav>
       )}
 
+      <footer className={`project-credit${mobile ? ' mobile' : ''}`}>
+        Developed by Khorshid Mohammad ·{' '}
+        <a href="https://sarnatnncc.ca/" target="_blank" rel="noopener noreferrer">The Harvey Sarnat NNCC Care Program</a> ·{' '}
+        <a href="https://sarnatnncc.ca/innovation.html" target="_blank" rel="noopener noreferrer">Dr. Luis Bello-Espinosa Innovation in NNCC Lab</a>
+      </footer>
+
       {/* SYSTEMS narration (free stepping) */}
       {activeSystem && !lesson && (
         <NarrationCard sys={window.SYS.SYSTEMS.find(s => s.id === activeSystem)} idx={sysStep} setIdx={setSysStep}
@@ -1190,11 +1196,20 @@ function Legend({ groups, layerOn, onPoster, posterBusy, onCopyLink, onZoom, mob
       <div className="eyebrow" style={{ marginBottom: 9 }}>Credits</div>
       <a href="https://github.com/itayinbarr" target="_blank" rel="noopener noreferrer" style={{ ...credLink, marginBottom: 10 }}><Icon name="github" size={14} /> Built by Itay Inbar</a>
       <p style={{ margin: 0, fontSize: 10.5, lineHeight: 1.5, color: 'var(--ink-faint)' }}>
-        initial 3D anatomy from z anatomy, built on BodyParts3D / DBCLS (CC&nbsp;BY-SA&nbsp;4.0). Deep nuclei,
+        Initial 3D anatomy from Z-Anatomy, built on BodyParts3D / DBCLS. Deep nuclei,
         hypothalamus and white-matter tracts registered from open MRI atlases: CIT168 (Pauli&nbsp;et&nbsp;al.
         2018; Tyszka&nbsp;&amp;&nbsp;Pauli 2016), the Najdenovska&nbsp;et&nbsp;al. 2018 thalamic atlas,
         the Neudorfer&nbsp;et&nbsp;al. 2020 hypothalamic atlas, and HCP1065 tract templates. Approximate and
         educational - not for clinical use.
+      </p>
+      <div style={{ display: 'grid', gap: 7, marginTop: 12 }}>
+        <a href="ATTRIBUTION.md" target="_blank" rel="noopener noreferrer" style={credLink}>Full credits &amp; anatomy licences</a>
+        <a href="THIRD_PARTY_NOTICES.md" target="_blank" rel="noopener noreferrer" style={credLink}>Third-party software notices</a>
+        <a href="LICENSE" target="_blank" rel="noopener noreferrer" style={credLink}>Complete distribution licence</a>
+        <a href="https://github.com/nncceducation-cpu/brain-atlas-3d" target="_blank" rel="noopener noreferrer" style={credLink}><Icon name="github" size={14} /> Source code</a>
+      </div>
+      <p style={{ margin: '12px 0 0', paddingTop: 10, borderTop: '1px solid var(--glass-edge)', fontSize: 10.5, lineHeight: 1.5, color: 'var(--ink-faint)' }}>
+        Developed by Khorshid Mohammad · <a href="https://sarnatnncc.ca/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--ink-soft)' }}>The Harvey Sarnat NNCC Care Program</a> · <a href="https://sarnatnncc.ca/innovation.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--ink-soft)' }}>Dr. Luis Bello-Espinosa Innovation in NNCC Lab</a>
       </p>
     </div>
   );

@@ -1,6 +1,6 @@
 {
   "name": "newborn-brain-3d",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Interactive term-equivalent newborn neuroanatomy atlas for web and offline desktop use.",
   "main": "electron/main.cjs",
   "author": "NNCC Education",
@@ -38,6 +38,7 @@
       "*.svg",
       "*.png",
       "ATTRIBUTION.md",
+      "THIRD_PARTY_NOTICES.md",
       "LICENSE",
       "README.md",
       "!firebase-analytics.js"

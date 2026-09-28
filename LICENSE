@@ -1,3 +1,27 @@
+NEWBORN BRAIN 3D — DISTRIBUTION LICENSING NOTICE
+================================================
+
+The Newborn Brain 3D application is distributed as an open educational work
+under Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA
+4.0), except for identifiable third-party components that retain their own
+licences. The source code written or modified by NNCC Education is offered
+under CC BY-SA 4.0 so that the combined application satisfies the ShareAlike
+terms requested by the Z-Anatomy model licensor.
+
+The original Brain Project viewer source by Itay Inbar remains available
+under Apache License 2.0. Nothing in this notice removes or restricts rights
+already granted under Apache 2.0. The Apache text and original copyright
+notice are preserved below.
+
+Anatomy and imaging assets retain the source-specific licences and terms
+listed after the Apache licence and in ATTRIBUTION.md. Required notices for
+bundled software libraries are in THIRD_PARTY_NOTICES.md. Recipients may
+obtain the complete corresponding source at:
+
+  https://github.com/nncceducation-cpu/brain-atlas-3d
+
+CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/
+
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -203,8 +227,11 @@
 ------------------------------------------------------------------------------
 NOTE ON THE 3D ANATOMY ASSETS (separate licence)
 
-The Apache 2.0 licence above covers the viewer SOURCE CODE only (HTML/CSS/JS/JSX,
-build and export scripts).
+The Apache 2.0 licence above covers the original Brain Project viewer source
+code (HTML/CSS/JS/JSX, build and export scripts). NNCC Education's source-code
+modifications are additionally offered under CC BY-SA 4.0 as stated at the top
+of this file; upstream Apache-licensed portions remain available under Apache
+2.0.
 
 The 3D geometry shipped with this project - the brain model and its derived
 files, e.g. brain-atlas/models/brain.glb and the manifest/metadata derived
@@ -217,9 +244,21 @@ Z-Anatomy, which is built on BodyParts3D / DBCLS, and is licensed under
 If you redistribute a modified version of the model, it must remain under
 CC BY-SA 4.0 and keep this attribution. See README.md ("Attribution & licence").
 
-  - Z-Anatomy - https://www.z-anatomy.com/  ·  https://github.com/Z-Anatomy
-  - BodyParts3D, © The Database Center for Life Science (DBCLS)
-    https://lifesciencedb.jp/bp3d/
+  - “Z-Anatomy — The libre 3D atlas of anatomy — CC BY-SA 4.0”
+    https://www.z-anatomy.com/ · https://github.com/Z-Anatomy
+  - “BodyParts3D — The Database Center for Life Science — CC BY-SA 2.1 Japan”
+    https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html
+  - Required Z-Anatomy upstream notice: “Brainder” and “White matter” from
+    the University of Washington. This notice is preserved verbatim; its
+    precise provenance has been publicly questioned.
+  - Required Z-Anatomy upstream notice: “Cranial Nerves and Foramina — by
+    University of Dundee, CAHID — CC BY 4.0.”
+
+Changes to the model include glTF conversion and reorganisation, normalized
+names and metadata, material and colour changes, visibility grouping,
+atlas-registration of deep structures and tract centre-lines, proportional
+venography registration, and integration into an interactive neonatal
+educational viewer. No endorsement by the original creators is implied.
 
 The deep-brain nuclei (globus pallidus internal/external; the seven thalamic
 nuclei groups; subthalamic nucleus, substantia nigra, nucleus accumbens; the
@@ -236,6 +275,15 @@ atlas-guided registration, from:
   - Neudorfer et al. 2020, "A high-resolution in vivo MRI atlas of the human
     hypothalamic region", Scientific Data, licensed CC BY 4.0
     https://doi.org/10.5281/zenodo.3942115
+  - HCP1065 Population-Averaged Tractography Atlas, Fang-Cheng Yeh 2022,
+    licensed CC BY-SA 4.0
+    https://brain.labsolver.org/hcp_trk_atlas.html
+
+HCP acknowledgement: Data were provided in part by the Human Connectome
+Project, WU-Minn Consortium (Principal Investigators: David Van Essen and
+Kamil Ugurbil; 1U54MH091657), funded by the 16 NIH Institutes and Centers that
+support the NIH Blueprint for Neuroscience Research, and by the McDonnell
+Center for Systems Neuroscience at Washington University.
 
 These derived nuclei remain under CC BY-SA 4.0 (CC BY 4.0 source material is
 compatible with redistribution inside a CC BY-SA 4.0 work). They are

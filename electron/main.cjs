@@ -8,6 +8,7 @@ const MIME = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8', '.jsx': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml',
+  '.md': 'text/plain; charset=utf-8', '.txt': 'text/plain; charset=utf-8',
   '.png': 'image/png', '.glb': 'model/gltf-binary', '.stl': 'model/stl',
   '.wasm': 'application/wasm', '.bin': 'application/octet-stream'
 };
@@ -28,8 +29,9 @@ function startLocalServer() {
           res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
           res.end('Not found'); return;
         }
+        const isLicenceFile = path.basename(file).toUpperCase() === 'LICENSE';
         res.writeHead(200, {
-          'Content-Type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream',
+          'Content-Type': isLicenceFile ? 'text/plain; charset=utf-8' : (MIME[path.extname(file).toLowerCase()] || 'application/octet-stream'),
           'Cache-Control': 'no-cache',
           'X-Content-Type-Options': 'nosniff'
         });
@@ -49,6 +51,16 @@ async function createWindow() {
     webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true }
   });
   win.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith(`http://127.0.0.1:${port}/`)) {
+      return {
+        action: 'allow',
+        overrideBrowserWindowOptions: {
+          width: 920, height: 760, minWidth: 640, minHeight: 480,
+          title: 'Newborn Brain 3D — licences and credits',
+          webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true }
+        }
+      };
+    }
     if (/^https?:\/\//i.test(url)) shell.openExternal(url);
     return { action: 'deny' };
   });

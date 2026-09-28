@@ -57,7 +57,15 @@ The desktop wrapper loads the same atlas and features from bundled local files. 
 
 ## Licensing and attribution
 
-Viewer code is Apache License 2.0. The 3D anatomy assets and derived metadata are CC BY-SA 4.0 and remain under that license. See [LICENSE](LICENSE) and [ATTRIBUTION.md](ATTRIBUTION.md).
+The combined Newborn Brain 3D distribution and NNCC Education modifications
+are released under **CC BY-SA 4.0**, subject to identifiable third-party
+components retaining their own licences. Original Brain Project viewer code
+remains available under Apache 2.0; the upstream Apache grant is preserved
+while Z-Anatomy's requested ShareAlike terms apply to the combined application.
+
+See [ATTRIBUTION.md](ATTRIBUTION.md) for complete anatomy/data provenance and
+the modification record, [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for
+bundled software notices, and [LICENSE](LICENSE) for the complete terms.
 
 The atlas is adapted from [itayinbarr/brainproject](https://github.com/itayinbarr/brainproject), with anatomical clipping added for this deployment.
 
